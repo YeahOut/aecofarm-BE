@@ -32,9 +32,6 @@ public class Item {
     // 물품 사진
     private String itemImage;
 
-    // 물품 제목
-    private String itemTitle;
-
     // 물품 설명
     private String itemContents;
 
@@ -47,6 +44,12 @@ public class Item {
 
     // 대여 가능 시간
     private Integer time;
+
+    // 거래 가능 시간
+    private Integer contractTime;
+
+    // 오픈채팅방 링크
+    private String kakao;
 
     // 물품 조회 횟수
     private Integer click;
