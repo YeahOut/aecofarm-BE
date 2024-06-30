@@ -1,2 +1,4 @@
-package dgu.aecofarm.domain.member.service;public interface MemberService {
+package dgu.aecofarm.domain.member.service;
+
+public interface MemberService {
 }
