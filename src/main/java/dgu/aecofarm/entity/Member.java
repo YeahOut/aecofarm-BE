@@ -68,4 +68,10 @@ public class Member {
 
     @OneToMany(mappedBy = "borrowMember")
     private List<Contract> borrowContracts;
+
+    @OneToMany(mappedBy = "lendMember")
+    private List<Alarm> lendAlarms;
+
+    @OneToMany(mappedBy = "borrowMember")
+    private List<Alarm> borrowAlarms;
 }

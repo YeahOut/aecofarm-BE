@@ -29,4 +29,19 @@ public class Alarm {
     @Column(nullable = false)
     private LocalDateTime time;
 
+    @Column(nullable = false)
+    private alarmStatus alarmStatus;
+
+    @Column(nullable = false)
+    private Category category;
+
+    // 빌려주는 사람
+    @ManyToOne
+    @JoinColumn(name = "lendId", nullable = false)
+    private Member lendMember;
+
+    // 빌리는 사람
+    @ManyToOne
+    @JoinColumn(name = "borrowId", nullable = false)
+    private Member borrowMember;
 }
