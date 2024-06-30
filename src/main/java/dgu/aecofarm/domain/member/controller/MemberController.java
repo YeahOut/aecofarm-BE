@@ -63,4 +63,10 @@ public class MemberController {
         }
         return Response.failure("사용자가 없습니다.");
     }
+
+    @PostMapping("/logout")
+    public Response<?> logout() {
+        // 클라이언트 측에서 토큰 삭제
+        return Response.success("로그아웃 되었습니다.");
+    }
 }
