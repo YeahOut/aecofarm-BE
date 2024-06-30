@@ -1,14 +1,12 @@
 package dgu.aecofarm.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
+@Getter
 @Builder
 @Table(name = "member")
 @AllArgsConstructor
@@ -39,10 +37,6 @@ public class Member {
     // 학번
     @Column(nullable = false)
     private Integer schoolNum;
-
-    // 주소
-    @Column(nullable = false)
-    private String address;
 
     // 사진
     private String image;
