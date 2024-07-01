@@ -99,6 +99,15 @@ public class MemberServiceImpl implements MemberService {
 
     }
 
+    @Override
+    public String signout(String memberId) {
+        Member member = memberRepository.findById(Long.valueOf(memberId))
+                .orElseThrow(() -> new IllegalArgumentException("유효한 사용자 ID가 아닙니다."));
+        memberRepository.delete(member);
+
+        return "회원 탈퇴에 성공하였습니다.";
+    }
+
     private String toSHA256(String base) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

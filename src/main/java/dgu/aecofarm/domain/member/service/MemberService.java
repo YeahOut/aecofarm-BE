@@ -15,4 +15,6 @@ public interface MemberService {
     Optional<JwtInfoResponseDTO> getLoginUserInfoByUserid(String name);
 
     String findPassword(FindPasswordRequestDTO findPasswordDTO);
+
+    String signout(String memberId);
 }

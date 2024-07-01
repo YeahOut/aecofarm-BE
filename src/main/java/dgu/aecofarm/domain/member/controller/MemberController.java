@@ -75,4 +75,13 @@ public class MemberController {
             return Response.failure(e);
         }
     }
+
+    @DeleteMapping("/signout")
+    public Response<?> signout(Authentication auth) {
+        try {
+            return Response.success(memberService.signout(auth.getName()));
+        } catch (Exception e) {
+            return Response.failure(e);
+        }
+    }
 }
