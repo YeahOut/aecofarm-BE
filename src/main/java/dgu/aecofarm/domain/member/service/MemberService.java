@@ -1,9 +1,6 @@
 package dgu.aecofarm.domain.member.service;
 
-import dgu.aecofarm.dto.member.JwtInfoResponseDTO;
-import dgu.aecofarm.dto.member.LoginRequestDTO;
-import dgu.aecofarm.dto.member.LoginResponseDTO;
-import dgu.aecofarm.dto.member.SignupRequestDTO;
+import dgu.aecofarm.dto.member.*;
 import dgu.aecofarm.entity.Member;
 
 import java.util.Optional;
@@ -16,4 +13,6 @@ public interface MemberService {
     Optional<Member> getLoginUserInfoByMemberId(String memberId);
 
     Optional<JwtInfoResponseDTO> getLoginUserInfoByUserid(String name);
+
+    String findPassword(FindPasswordRequestDTO findPasswordDTO);
 }

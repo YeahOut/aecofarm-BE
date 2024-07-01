@@ -68,4 +68,9 @@ public class Member {
 
     @OneToMany(mappedBy = "borrowMember")
     private List<Alarm> borrowAlarms;
+
+    // 수정 메서드
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
 }

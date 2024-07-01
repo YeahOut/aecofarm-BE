@@ -1,10 +1,7 @@
 package dgu.aecofarm.domain.member.controller;
 
 import dgu.aecofarm.domain.member.service.MemberService;
-import dgu.aecofarm.dto.member.JwtInfoResponseDTO;
-import dgu.aecofarm.dto.member.LoginRequestDTO;
-import dgu.aecofarm.dto.member.LoginResponseDTO;
-import dgu.aecofarm.dto.member.SignupRequestDTO;
+import dgu.aecofarm.dto.member.*;
 import dgu.aecofarm.entity.Response;
 import dgu.aecofarm.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
@@ -68,5 +65,14 @@ public class MemberController {
     public Response<?> logout() {
         // 클라이언트 측에서 토큰 삭제
         return Response.success("로그아웃 되었습니다.");
+    }
+
+    @PostMapping("/update/pw")
+    public Response<?> findPassword(@RequestBody FindPasswordRequestDTO findPasswordDTO) {
+        try {
+            return Response.success(memberService.findPassword(findPasswordDTO));
+        } catch (Exception e) {
+            return Response.failure(e);
+        }
     }
 }

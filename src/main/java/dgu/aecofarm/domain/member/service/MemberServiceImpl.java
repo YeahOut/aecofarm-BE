@@ -1,9 +1,6 @@
 package dgu.aecofarm.domain.member.service;
 
-import dgu.aecofarm.dto.member.JwtInfoResponseDTO;
-import dgu.aecofarm.dto.member.LoginRequestDTO;
-import dgu.aecofarm.dto.member.LoginResponseDTO;
-import dgu.aecofarm.dto.member.SignupRequestDTO;
+import dgu.aecofarm.dto.member.*;
 import dgu.aecofarm.entity.Member;
 import dgu.aecofarm.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -71,13 +68,35 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.findByMemberId(Long.valueOf(memberId));
     }
 
-    @Override
+    // 로그인한 Member 조회
     public Optional<JwtInfoResponseDTO> getLoginUserInfoByUserid(String memberId) {
         return memberRepository.findByMemberId(Long.valueOf(memberId)).map(member ->
                 JwtInfoResponseDTO.builder()
                         .memberId(member.getMemberId())
                         .userName(member.getUserName())
                         .build());
+    }
+
+    public String findPassword(FindPasswordRequestDTO findPasswordDTO) {
+        // memberId로 회원 정보 조회
+        Member member = memberRepository.findMemberByEmail(findPasswordDTO.getEmail());
+
+        if (member == null) {
+            throw new IllegalArgumentException("유효한 이메일이 아닙니다.");
+        }
+
+        // 사용자 이름과 학번이 일치하는지 확인
+        if (!member.getUserName().equals(findPasswordDTO.getUserName()) || member.getSchoolNum() != findPasswordDTO.getSchoolNum()) {
+            throw new IllegalArgumentException("사용자 정보가 일치하지 않습니다.");
+        }
+
+        // 비밀번호 재설정
+        String newPassword = toSHA256(findPasswordDTO.getPassword());
+        member.updatePassword(newPassword);
+        memberRepository.save(member);
+
+        return "비밀번호 재설정에 성공하였습니다.";
+
     }
 
     private String toSHA256(String base) {
