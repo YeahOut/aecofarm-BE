@@ -23,12 +23,12 @@ public class Contract {
 
     // 빌려주는 사람
     @ManyToOne
-    @JoinColumn(name = "lendId", nullable = false)
+    @JoinColumn(name = "lendId")
     private Member lendMember;
 
     // 빌리는 사람
     @ManyToOne
-    @JoinColumn(name = "borrowId", nullable = false)
+    @JoinColumn(name = "borrowId")
     private Member borrowMember;
 
     // 물품 아이디

@@ -39,7 +39,6 @@ public class Item {
     private String itemPlace;
 
     // 물품 해시태그
-    @Column(columnDefinition = "json")
     private String itemHash;
 
     // 대여 가능 시간
@@ -52,6 +51,7 @@ public class Item {
     private String kakao;
 
     // 물품 조회 횟수
+    @Column(nullable = false, columnDefinition = "int default 0")
     private Integer click;
 
     // 글 작성 시간
