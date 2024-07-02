@@ -1,16 +1,14 @@
 package dgu.aecofarm.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Builder
+@Getter
 @Table(name = "item")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

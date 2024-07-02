@@ -2,6 +2,7 @@ package dgu.aecofarm.domain.contract.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dgu.aecofarm.dto.contract.ContractDetailResponseDTO;
 import dgu.aecofarm.dto.contract.CreateContractRequestDTO;
 import dgu.aecofarm.entity.*;
 import dgu.aecofarm.exception.InvalidUserIdException;
@@ -12,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -135,5 +138,32 @@ public class ContractServiceImpl implements ContractService {
         contractRepository.delete(contract); // 먼저 계약 삭제
         itemRepository.delete(item); // 그 다음 아이템 삭제
         return "게시글 삭제에 성공하였습니다.";
+    }
+
+    @Transactional(readOnly = true)
+    public ContractDetailResponseDTO getContractDetail(Long contractId) {
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new IllegalArgumentException("유효한 계약 ID가 아닙니다."));
+
+        Item item = contract.getItem();
+
+        List<String> itemHashList;
+        try {
+            itemHashList = objectMapper.readValue(item.getItemHash(), List.class);
+        } catch (IOException e) {
+            throw new RuntimeException("아이템 해시를 리스트로 변환하는데 실패했습니다.", e);
+        }
+
+        return ContractDetailResponseDTO.builder()
+                .itemName(item.getItemName())
+                .price(item.getPrice())
+                .itemImage(item.getItemImage())
+                .itemContents(item.getItemContents())
+                .itemPlace(item.getItemPlace())
+                .itemHash(itemHashList)
+                .time(item.getTime())
+                .contractTime(item.getContractTime())
+                .kakao(item.getKakao())
+                .build();
     }
 }

@@ -1,6 +1,7 @@
 package dgu.aecofarm.domain.contract.controller;
 
 import dgu.aecofarm.domain.contract.service.ContractService;
+import dgu.aecofarm.dto.contract.ContractDetailResponseDTO;
 import dgu.aecofarm.dto.contract.CreateContractRequestDTO;
 import dgu.aecofarm.entity.Response;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,16 @@ public class ContractController {
             return Response.success(contractService.deleteContract(contractId, auth.getName()));
         } catch (Exception e) {
             return Response.failure(e);
+        }
+    }
+
+    @GetMapping("/detail/{contractId}")
+    public Response<?> getContractDetail(@PathVariable("contractId") Long contractId) {
+        try {
+            ContractDetailResponseDTO contractDetail = contractService.getContractDetail(contractId);
+            return Response.success(contractDetail);
+        } catch (Exception e) {
+            return Response.failure(e.getMessage());
         }
     }
 }
