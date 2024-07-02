@@ -1,16 +1,14 @@
 package dgu.aecofarm.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Builder
+@Getter
 @Table(name = "contract")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -54,4 +52,13 @@ public class Contract {
 
     @OneToMany(mappedBy = "contract")
     private List<Alarm> alarms;
+
+    // 수정 메서드
+    public void updateItem(Item item) {
+        this.item = item;
+    }
+
+    public void updateCategory(Category category) {
+        this.category = category;
+    }
 }
