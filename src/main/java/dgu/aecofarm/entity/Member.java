@@ -1,14 +1,12 @@
 package dgu.aecofarm.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
+@Getter
 @Builder
 @Table(name = "member")
 @AllArgsConstructor
@@ -40,10 +38,6 @@ public class Member {
     @Column(nullable = false)
     private Integer schoolNum;
 
-    // 주소
-    @Column(nullable = false)
-    private String address;
-
     // 사진
     private String image;
 
@@ -74,4 +68,9 @@ public class Member {
 
     @OneToMany(mappedBy = "borrowMember")
     private List<Alarm> borrowAlarms;
+
+    // 수정 메서드
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
 }
