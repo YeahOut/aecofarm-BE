@@ -1,16 +1,14 @@
 package dgu.aecofarm.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Builder
+@Getter
 @Table(name = "item")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -51,7 +49,7 @@ public class Item {
     private String kakao;
 
     // 물품 조회 횟수
-    @Column(nullable = false, columnDefinition = "int default 0")
+    @Column(nullable = false)
     private Integer click;
 
     // 글 작성 시간
@@ -98,5 +96,9 @@ public class Item {
 
     public void updateKakao(String kakao) {
         this.kakao = kakao;
+    }
+
+    public void updateClickCount() {
+        this.click += 1;
     }
 }

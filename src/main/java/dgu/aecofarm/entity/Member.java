@@ -73,4 +73,9 @@ public class Member {
     public void updatePassword(String newPassword) {
         this.password = newPassword;
     }
+
+    // 최근 본 물품 업데이트
+    public void updateRecent(String recent) {
+        this.recent = recent;
+    }
 }

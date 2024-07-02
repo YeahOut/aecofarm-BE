@@ -1,5 +1,6 @@
 package dgu.aecofarm.domain.contract.service;
 
+import dgu.aecofarm.dto.contract.ContractDetailResponseDTO;
 import dgu.aecofarm.dto.contract.CreateContractRequestDTO;
 
 public interface ContractService {
@@ -8,4 +9,6 @@ public interface ContractService {
     String  updateContract(Long contractId, CreateContractRequestDTO postRequestDTO, String memeberId);
 
     String deleteContract(Long contractId, String memberId);
+
+    ContractDetailResponseDTO getContractDetail(Long contractId, String memberId);
 }
