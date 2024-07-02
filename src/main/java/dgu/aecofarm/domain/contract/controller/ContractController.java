@@ -43,9 +43,9 @@ public class ContractController {
     }
 
     @GetMapping("/detail/{contractId}")
-    public Response<?> getContractDetail(@PathVariable("contractId") Long contractId) {
+    public Response<?> getContractDetail(@PathVariable("contractId") Long contractId, Authentication auth) {
         try {
-            ContractDetailResponseDTO contractDetail = contractService.getContractDetail(contractId);
+            ContractDetailResponseDTO contractDetail = contractService.getContractDetail(contractId, auth.getName());
             return Response.success(contractDetail);
         } catch (Exception e) {
             return Response.failure(e.getMessage());

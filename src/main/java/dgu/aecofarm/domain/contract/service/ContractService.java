@@ -10,5 +10,5 @@ public interface ContractService {
 
     String deleteContract(Long contractId, String memberId);
 
-    ContractDetailResponseDTO getContractDetail(Long contractId);
+    ContractDetailResponseDTO getContractDetail(Long contractId, String memberId);
 }
