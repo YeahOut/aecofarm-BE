@@ -5,10 +5,7 @@ import dgu.aecofarm.dto.contract.CreateContractRequestDTO;
 import dgu.aecofarm.entity.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,10 +14,10 @@ public class BorrowController {
 
     private final BorrowService borrowService;
 
-    @PostMapping("/reqeust")
-    public Response<?> requestBorrow() {
+    @PostMapping("/reqeust/{contractId}")
+    public Response<?> requestBorrow(@PathVariable("contractId") Long contractId, Authentication auth) {
         try {
-            return Response.success();
+            return Response.success(borrowService.requestBorrow(contractId, auth.getName()));
         } catch (Exception e) {
             return Response.failure(e);
         }
