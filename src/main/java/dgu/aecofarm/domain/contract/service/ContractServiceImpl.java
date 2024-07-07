@@ -142,28 +142,30 @@ public class ContractServiceImpl implements ContractService {
 
         // 최근 본 물품에 추가
         try {
-            // Integer -> Long 으로 변환
-            List<Integer> rawRecentList = member.getRecent() == null ? new ArrayList<>() : objectMapper.readValue(member.getRecent(), List.class);
-            List<Long> recentList = new ArrayList<>();
-            for (Object id : rawRecentList) {
-                if (id instanceof Integer) {
-                    recentList.add(((Integer) id).longValue());
-                } else if (id instanceof Long) {
-                    recentList.add((Long) id);
+            if (contract.getCategory() == Category.BORROW) {
+                // Integer -> Long 으로 변환
+                List<Integer> rawRecentList = member.getRecent() == null ? new ArrayList<>() : objectMapper.readValue(member.getRecent(), List.class);
+                List<Long> recentList = new ArrayList<>();
+                for (Object id : rawRecentList) {
+                    if (id instanceof Integer) {
+                        recentList.add(((Integer) id).longValue());
+                    } else if (id instanceof Long) {
+                        recentList.add((Long) id);
+                    }
                 }
-            }
 
-            // 중복된 물품이 있는 경우 제거
-            int index = recentList.indexOf(contractId);
-            if (index != -1) {
-                recentList.remove(index);
-                System.out.println(index);
-            }
+                // 중복된 물품이 있는 경우 제거
+                int index = recentList.indexOf(contractId);
+                if (index != -1) {
+                    recentList.remove(index);
+                    System.out.println(index);
+                }
 
-            // 맨 마지막에 추가
-            recentList.add(contractId);
-            member.updateRecent(objectMapper.writeValueAsString(recentList));
-            memberRepository.save(member);
+                // 맨 마지막에 추가
+                recentList.add(contractId);
+                member.updateRecent(objectMapper.writeValueAsString(recentList));
+                memberRepository.save(member);
+            }
         } catch (JsonProcessingException e) {
             throw new RuntimeException("최근 본 물품 업데이트 중 오류 발생", e);
         }
