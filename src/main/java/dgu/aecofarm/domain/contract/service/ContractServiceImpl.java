@@ -73,21 +73,6 @@ public class ContractServiceImpl implements ContractService {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new IllegalArgumentException("유효한 계약 ID가 아닙니다."));
 
-        Member member = memberRepository.findById(Long.valueOf(memberId))
-                .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
-
-        // 수정 권한 체크
-        boolean hasUpdatePermission = false;
-        if (contract.getCategory() == Category.BORROW && contract.getLendMember() != null && contract.getLendMember().equals(member)) {
-            hasUpdatePermission = true;
-        } else if (contract.getCategory() == Category.LEND && contract.getBorrowMember() != null && contract.getBorrowMember().equals(member)) {
-            hasUpdatePermission = true;
-        }
-
-        if (!hasUpdatePermission) {
-            throw new IllegalArgumentException("수정 권한이 없습니다.");
-        }
-
         String itemHashJson;
         try {
             itemHashJson = objectMapper.writeValueAsString(createContractRequestDTO.getItemHash());
@@ -119,21 +104,6 @@ public class ContractServiceImpl implements ContractService {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new IllegalArgumentException("유효한 계약 ID가 아닙니다."));
 
-        Member member = memberRepository.findById(Long.valueOf(memberId))
-                .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
-
-        // 삭제 권한 체크
-        boolean hasDeletePermission = false;
-        if (contract.getCategory() == Category.BORROW && contract.getLendMember() != null && contract.getLendMember().equals(member)) {
-            hasDeletePermission = true;
-        } else if (contract.getCategory() == Category.LEND && contract.getBorrowMember() != null && contract.getBorrowMember().equals(member)) {
-            hasDeletePermission = true;
-        }
-
-        if (!hasDeletePermission) {
-            throw new IllegalArgumentException("삭제 권한이 없습니다.");
-        }
-
         // 아이템 삭제
         Item item = contract.getItem();
         contractRepository.delete(contract); // 먼저 계약 삭제
@@ -144,7 +114,18 @@ public class ContractServiceImpl implements ContractService {
     @Transactional
     public ContractDetailResponseDTO getContractDetail(Long contractId, String memberId) {
         Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new IllegalArgumentException("삭제된 게시글 입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("없는 게시글 입니다."));
+
+        Member member = memberRepository.findById(Long.valueOf(memberId))
+                .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
+
+        // 수정, 삭제 권한 체크
+        boolean hasPermission = false;
+        if (contract.getCategory() == Category.BORROW && contract.getLendMember() != null && contract.getLendMember().equals(member)) {
+            hasPermission = true;
+        } else if (contract.getCategory() == Category.LEND && contract.getBorrowMember() != null && contract.getBorrowMember().equals(member)) {
+            hasPermission = true;
+        }
 
         Item item = contract.getItem();
 
@@ -160,9 +141,6 @@ public class ContractServiceImpl implements ContractService {
         itemRepository.save(item);
 
         // 최근 본 물품에 추가
-        Member member = memberRepository.findById(Long.valueOf(memberId))
-                .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
-
         try {
             // Integer -> Long 으로 변환
             List<Integer> rawRecentList = member.getRecent() == null ? new ArrayList<>() : objectMapper.readValue(member.getRecent(), List.class);
@@ -191,6 +169,8 @@ public class ContractServiceImpl implements ContractService {
         }
 
         return ContractDetailResponseDTO.builder()
+                .owner(hasPermission)
+                .userName(member.getUserName())
                 .itemName(item.getItemName())
                 .price(item.getPrice())
                 .itemImage(item.getItemImage())
