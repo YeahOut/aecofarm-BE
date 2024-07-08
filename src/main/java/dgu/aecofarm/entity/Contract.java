@@ -61,4 +61,12 @@ public class Contract {
     public void updateCategory(Category category) {
         this.category = category;
     }
+
+    public void updateBorrowMember(Member member) {
+        this.borrowMember = member;
+    }
+
+    public void updateStatus(Status status) {
+        this.status = status;
+    }
 }

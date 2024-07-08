@@ -39,9 +39,13 @@ public class MemberServiceImpl implements MemberService {
                 .phone(phone)
                 .schoolNum(schoolNum)
                 .image(image)
+                .point(3000)
                 .build();
-
         memberRepository.save(member);
+
+        // 회원가입 시 기본 포인트 3000
+
+
         return "회원가입 성공";
     }
 

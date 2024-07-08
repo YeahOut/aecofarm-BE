@@ -11,6 +11,8 @@ import java.util.List;
 @Data
 @Builder
 public class ContractDetailResponseDTO {
+    private Boolean owner;
+    private String userName;
     private String itemName;
     private Integer price;
     private String itemImage;

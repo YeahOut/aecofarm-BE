@@ -29,9 +29,13 @@ public class Alarm {
     @Column(nullable = false)
     private LocalDateTime time;
 
+    // 요청 상태
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private alarmStatus alarmStatus;
 
+    // 카테고리 (빌려주기, 빌리기 게시판)
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Category category;
 
