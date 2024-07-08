@@ -66,6 +66,10 @@ public class Contract {
         this.borrowMember = member;
     }
 
+    public void updateLendMember(Member member) {
+        this.lendMember = member;
+    }
+
     public void updateStatus(Status status) {
         this.status = status;
     }
