@@ -3,6 +3,7 @@ package dgu.aecofarm.domain.contract.controller;
 import dgu.aecofarm.domain.contract.service.ContractService;
 import dgu.aecofarm.dto.contract.ContractDetailResponseDTO;
 import dgu.aecofarm.dto.contract.CreateContractRequestDTO;
+import dgu.aecofarm.dto.contract.PayRequestDTO;
 import dgu.aecofarm.entity.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -53,7 +54,16 @@ public class ContractController {
     }
 
     @GetMapping("/get/pay/{contractId}")
-    public Response<?> getContractPayDetails(@PathVariable("contractId") Long contractId, Authentication auth) {
+    public Response<?> getPayDetails(@PathVariable("contractId") Long contractId, Authentication auth) {
         return Response.success(contractService.getPayDetails(contractId, auth.getName()));
+    }
+
+    @PostMapping("/pay")
+    public Response<?> payForContract(@RequestBody PayRequestDTO payRequestDTO, Authentication auth) {
+        try {
+            return Response.success(contractService.payForContract(payRequestDTO, auth.getName()));
+        } catch (Exception e) {
+            return Response.failure(e);
+        }
     }
 }

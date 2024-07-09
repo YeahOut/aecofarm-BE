@@ -69,7 +69,7 @@ public class Member {
     @OneToMany(mappedBy = "borrowMember")
     private List<Alarm> borrowAlarms;
 
-    // 수정 메서드
+    // 비밀번호 변경
     public void updatePassword(String newPassword) {
         this.password = newPassword;
     }
@@ -78,4 +78,10 @@ public class Member {
     public void updateRecent(String recent) {
         this.recent = recent;
     }
+
+    // 포인트 적립 or 차감
+    public void updatePoint(int newPoint) {
+        this.point = newPoint;
+    }
+
 }
