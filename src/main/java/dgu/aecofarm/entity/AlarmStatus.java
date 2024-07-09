@@ -1,6 +1,6 @@
 package dgu.aecofarm.entity;
 
-public enum alarmStatus {
+public enum AlarmStatus {
     REQUEST,
     ACCEPT,
     REJECT,
