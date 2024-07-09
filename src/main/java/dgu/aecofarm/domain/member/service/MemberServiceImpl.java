@@ -2,16 +2,16 @@ package dgu.aecofarm.domain.member.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dgu.aecofarm.dto.member.*;
-import dgu.aecofarm.entity.Contract;
-import dgu.aecofarm.entity.Item;
-import dgu.aecofarm.entity.Member;
+import dgu.aecofarm.entity.*;
 import dgu.aecofarm.exception.InvalidUserIdException;
 import dgu.aecofarm.repository.ContractRepository;
 import dgu.aecofarm.repository.ItemRepository;
+import dgu.aecofarm.repository.LoveRepository;
 import dgu.aecofarm.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -31,6 +31,7 @@ public class MemberServiceImpl implements MemberService {
     private final ItemRepository itemRepository;
     private final ObjectMapper objectMapper;
     private final ContractRepository contractRepository;
+    private final LoveRepository loveRepository;
 
     public String signup(SignupRequestDTO signupRequestDTO) {
         String email = signupRequestDTO.getEmail();
@@ -186,6 +187,72 @@ public class MemberServiceImpl implements MemberService {
         return RecommendResponseDTO.builder()
                 .recommendedKeywords(recommendedKeywords)
                 .hotSearchRankings(hotSearchRankings)
+                .build();
+    }
+
+    @Transactional
+    public SearchResponseDTO searchItems(SearchRequestDTO searchRequestDTO, String memberId) {
+        Member member = memberRepository.findById(Long.valueOf(memberId))
+                .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
+
+        String keyword = searchRequestDTO.getKeyword();
+
+        List<Contract> lendContracts = contractRepository.findByCategoryAndStatusAndItemItemNameContaining(Category.LEND, Status.NONE, keyword);
+        List<Contract> borrowContracts = contractRepository.findByCategoryAndStatusAndItemItemNameContaining(Category.BORROW, Status.NONE, keyword);
+
+        List<SearchResponseDTO.SearchItemDTO> lendItems = lendContracts.stream().map(contract -> {
+            Item item = contract.getItem();
+            List<String> itemHashList;
+            try {
+                itemHashList = objectMapper.readValue(item.getItemHash(), List.class);
+            } catch (IOException e) {
+                throw new RuntimeException("아이템 해시를 리스트로 변환하는데 실패했습니다.", e);
+            }
+            boolean likeStatus = loveRepository.existsByItemAndMember(item, member);
+            boolean donateStatus = item.getPrice() == 0;
+
+            return SearchResponseDTO.SearchItemDTO.builder()
+                    .contractId(contract.getContractId())
+                    .itemName(item.getItemName())
+                    .itemImage(item.getItemImage())
+                    .price(item.getPrice())
+                    .itemPlace(item.getItemPlace())
+                    .time(item.getTime())
+                    .contractTime(item.getContractTime())
+                    .itemHash(itemHashList)
+                    .likeStatus(likeStatus)
+                    .donateStatus(donateStatus)
+                    .build();
+        }).collect(Collectors.toList());
+
+        List<SearchResponseDTO.SearchItemDTO> borrowItems = borrowContracts.stream().map(contract -> {
+            Item item = contract.getItem();
+            List<String> itemHashList;
+            try {
+                itemHashList = objectMapper.readValue(item.getItemHash(), List.class);
+            } catch (IOException e) {
+                throw new RuntimeException("아이템 해시를 리스트로 변환하는데 실패했습니다.", e);
+            }
+            boolean likeStatus = loveRepository.existsByItemAndMember(item, member);
+            boolean donateStatus = item.getPrice() == 0;
+
+            return SearchResponseDTO.SearchItemDTO.builder()
+                    .contractId(contract.getContractId())
+                    .itemName(item.getItemName())
+                    .itemImage(item.getItemImage())
+                    .price(item.getPrice())
+                    .itemPlace(item.getItemPlace())
+                    .time(item.getTime())
+                    .contractTime(item.getContractTime())
+                    .itemHash(itemHashList)
+                    .likeStatus(likeStatus)
+                    .donateStatus(donateStatus)
+                    .build();
+        }).collect(Collectors.toList());
+
+        return SearchResponseDTO.builder()
+                .lendItems(lendItems)
+                .borrowItems(borrowItems)
                 .build();
     }
 }
