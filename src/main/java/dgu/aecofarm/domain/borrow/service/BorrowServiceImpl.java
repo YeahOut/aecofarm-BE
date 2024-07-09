@@ -1,16 +1,24 @@
 package dgu.aecofarm.domain.borrow.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dgu.aecofarm.dto.borrow.AcceptRejectRequestDTO;
+import dgu.aecofarm.dto.borrow.BorrowListResponseDTO;
+import dgu.aecofarm.dto.borrow.SortType;
 import dgu.aecofarm.entity.*;
 import dgu.aecofarm.exception.InvalidUserIdException;
 import dgu.aecofarm.repository.AlarmRepository;
 import dgu.aecofarm.repository.ContractRepository;
+import dgu.aecofarm.repository.LoveRepository;
 import dgu.aecofarm.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +27,8 @@ public class BorrowServiceImpl implements BorrowService {
     private final ContractRepository contractRepository;
     private final MemberRepository memberRepository;
     private final AlarmRepository alarmRepository;
+    private final LoveRepository loveRepository;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     public String requestBorrow(Long contractId, String memberId) {
@@ -87,5 +97,52 @@ public class BorrowServiceImpl implements BorrowService {
         alarmRepository.save(alarm);
 
         return acceptRejectRequestDTO.isSuccess() ? "대여 요청을 승인하였습니다." : "대여 요청을 거절하였습니다.";
+    }
+
+    @Transactional
+    public List<BorrowListResponseDTO> getBorrowList(String memberId, SortType sortType) {
+        Member member = memberRepository.findById(Long.valueOf(memberId))
+                .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
+
+        List<Contract> contracts = contractRepository.findByCategoryAndStatus(Category.BORROW, Status.NONE);
+
+        List<BorrowListResponseDTO> resultList = contracts.stream().map(contract -> {
+            Item item = contract.getItem();
+            List<String> itemHashList;
+            try {
+                itemHashList = objectMapper.readValue(item.getItemHash(), List.class);
+            } catch (IOException e) {
+                throw new RuntimeException("아이템 해시를 리스트로 변환하는데 실패했습니다.", e);
+            }
+            boolean likeStatus = loveRepository.existsByItemAndMember(item, member);
+            boolean donateStatus = item.getPrice() == 0;
+
+            return BorrowListResponseDTO.builder()
+                    .contractId(contract.getContractId())
+                    .itemId(item.getItemId())
+                    .itemName(item.getItemName())
+                    .itemImage(item.getItemImage())
+                    .price(item.getPrice())
+                    .itemPlace(item.getItemPlace())
+                    .time(item.getTime())
+                    .contractTime(item.getContractTime())
+                    .itemHash(itemHashList)
+                    .likeStatus(likeStatus)
+                    .donateStatus(donateStatus)
+                    .build();
+        }).collect(Collectors.toList());
+
+        // 정렬 기준에 따라 정렬
+        if (sortType == SortType.NEWEST) {
+            resultList.sort(Comparator.comparing(BorrowListResponseDTO::getContractId).reversed());
+        } else if (sortType == SortType.PRICE_ASC) {
+            resultList.sort(Comparator.comparing(BorrowListResponseDTO::getPrice));
+        } else if (sortType == SortType.PRICE_DESC) {
+            resultList.sort(Comparator.comparing(BorrowListResponseDTO::getPrice).reversed());
+        } else if (sortType == SortType.DISTANCE) {
+            resultList.sort(Comparator.comparing(BorrowListResponseDTO::getContractTime));
+        }
+
+        return resultList;
     }
 }
