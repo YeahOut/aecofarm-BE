@@ -1,8 +1,11 @@
 package dgu.aecofarm.domain.member.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dgu.aecofarm.domain.member.service.MemberService;
 import dgu.aecofarm.dto.member.*;
+import dgu.aecofarm.entity.Member;
 import dgu.aecofarm.entity.Response;
+import dgu.aecofarm.repository.ItemRepository;
 import dgu.aecofarm.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -80,6 +83,16 @@ public class MemberController {
     public Response<?> signout(Authentication auth) {
         try {
             return Response.success(memberService.signout(auth.getName()));
+        } catch (Exception e) {
+            return Response.failure(e);
+        }
+    }
+
+    @GetMapping("/recommand")
+    public Response<?> getRecommand(Authentication auth) {
+        try {
+            RecommendResponseDTO recommendResponseDTO = memberService.getRecommand(auth.getName());
+            return Response.success(recommendResponseDTO);
         } catch (Exception e) {
             return Response.failure(e);
         }
