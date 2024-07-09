@@ -1,6 +1,7 @@
 package dgu.aecofarm.domain.borrow.controller;
 
 import dgu.aecofarm.domain.borrow.service.BorrowService;
+import dgu.aecofarm.dto.borrow.AcceptRejectRequestDTO;
 import dgu.aecofarm.dto.contract.CreateContractRequestDTO;
 import dgu.aecofarm.entity.Response;
 import lombok.RequiredArgsConstructor;
@@ -23,5 +24,12 @@ public class BorrowController {
         }
     }
 
-
+    @PatchMapping("/success")
+    public Response<?> requestAcceptReject(@RequestBody AcceptRejectRequestDTO acceptRejectRequestDTO, Authentication auth) {
+        try {
+            return Response.success(borrowService.requestAcceptReject(acceptRejectRequestDTO, auth.getName()));
+        } catch (Exception e) {
+            return Response.failure(e);
+        }
+    }
 }
