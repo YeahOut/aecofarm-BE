@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dgu.aecofarm.dto.contract.ContractDetailResponseDTO;
 import dgu.aecofarm.dto.contract.CreateContractRequestDTO;
+import dgu.aecofarm.dto.contract.GetPayResponseDTO;
 import dgu.aecofarm.entity.*;
 import dgu.aecofarm.exception.InvalidUserIdException;
 import dgu.aecofarm.repository.ContractRepository;
@@ -182,6 +183,46 @@ public class ContractServiceImpl implements ContractService {
                 .time(item.getTime())
                 .contractTime(item.getContractTime())
                 .kakao(item.getKakao())
+                .build();
+    }
+
+    @Transactional
+    public GetPayResponseDTO getPayDetails(Long contractId, String memberId) {
+        Member member = memberRepository.findById(Long.valueOf(memberId))
+                .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
+
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new IllegalArgumentException("유효한 계약 ID가 아닙니다."));
+
+        // status가 BEFOREPAY가 아닐 경우
+        if (contract.getStatus() != Status.BEFOREPAY) {
+            throw new IllegalArgumentException("결제 가능한 상태가 아닙니다.");
+        }
+
+        // 사용자가 해당 계약에 대한 권한이 있는지 확인
+        if ((contract.getCategory() == Category.BORROW && !contract.getBorrowMember().equals(member)) ||
+                (contract.getCategory() == Category.LEND && !contract.getBorrowMember().equals(member))) {
+            throw new IllegalArgumentException("해당 contract에 대한 권한이 없습니다.");
+        }
+
+        Item item = contract.getItem();
+
+        List<String> itemHashList;
+        try {
+            itemHashList = objectMapper.readValue(item.getItemHash(), List.class);
+        } catch (IOException e) {
+            throw new RuntimeException("아이템 해시를 리스트로 변환하는데 실패했습니다.", e);
+        }
+
+        return GetPayResponseDTO.builder()
+                .itemName(item.getItemName())
+                .image(item.getItemImage())
+                .price(item.getPrice())
+                .myPoint(member.getPoint())
+                .itemPlace(item.getItemPlace())
+                .time(item.getTime())
+                .contractTime(item.getContractTime())
+                .itemHash(itemHashList)
                 .build();
     }
 }

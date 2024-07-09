@@ -51,4 +51,9 @@ public class ContractController {
             return Response.failure(e.getMessage());
         }
     }
+
+    @GetMapping("/get/pay/{contractId}")
+    public Response<?> getContractPayDetails(@PathVariable("contractId") Long contractId, Authentication auth) {
+        return Response.success(contractService.getPayDetails(contractId, auth.getName()));
+    }
 }
