@@ -1,13 +1,11 @@
 package dgu.aecofarm.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Entity
 @Builder
 @Table(name = "alarm")
