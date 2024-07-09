@@ -2,10 +2,7 @@ package dgu.aecofarm.domain.contract.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dgu.aecofarm.dto.contract.ContractDetailResponseDTO;
-import dgu.aecofarm.dto.contract.CreateContractRequestDTO;
-import dgu.aecofarm.dto.contract.GetPayResponseDTO;
-import dgu.aecofarm.dto.contract.PayRequestDTO;
+import dgu.aecofarm.dto.contract.*;
 import dgu.aecofarm.entity.*;
 import dgu.aecofarm.exception.InvalidUserIdException;
 import dgu.aecofarm.repository.AlarmRepository;
@@ -277,5 +274,35 @@ public class ContractServiceImpl implements ContractService {
         alarmRepository.save(alarm);
 
         return "결제가 완료되었습니다.";
+    }
+
+    @Transactional
+    public GetReserveResponseDTO getReserveDetails(Long contractId) {
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new IllegalArgumentException("유효한 계약 ID가 아닙니다."));
+
+        // contract 상태가 NONE인지 확인
+        if (contract.getStatus() != Status.NONE) {
+            throw new IllegalArgumentException("예약 가능한 상태가 아닙니다.");
+        }
+
+        Item item = contract.getItem();
+
+        List<String> itemHashList;
+        try {
+            itemHashList = objectMapper.readValue(item.getItemHash(), List.class);
+        } catch (IOException e) {
+            throw new RuntimeException("아이템 해시를 리스트로 변환하는데 실패했습니다.", e);
+        }
+
+        return GetReserveResponseDTO.builder()
+                .itemName(item.getItemName())
+                .image(item.getItemImage())
+                .price(item.getPrice())
+                .itemPlace(item.getItemPlace())
+                .time(item.getTime())
+                .contractTime(item.getContractTime())
+                .itemHash(itemHashList)
+                .build();
     }
 }

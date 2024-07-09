@@ -66,4 +66,13 @@ public class ContractController {
             return Response.failure(e);
         }
     }
+
+    @GetMapping("/get/reserve/{contractId}")
+    public Response<?> getReserveDetails(@PathVariable("contractId") Long contractId) {
+        try {
+            return Response.success(contractService.getReserveDetails(contractId));
+        } catch (Exception e) {
+            return Response.failure(e.getMessage());
+        }
+    }
 }

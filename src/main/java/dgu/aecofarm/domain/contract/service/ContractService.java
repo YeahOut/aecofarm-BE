@@ -1,9 +1,6 @@
 package dgu.aecofarm.domain.contract.service;
 
-import dgu.aecofarm.dto.contract.ContractDetailResponseDTO;
-import dgu.aecofarm.dto.contract.CreateContractRequestDTO;
-import dgu.aecofarm.dto.contract.GetPayResponseDTO;
-import dgu.aecofarm.dto.contract.PayRequestDTO;
+import dgu.aecofarm.dto.contract.*;
 
 public interface ContractService {
     String createContract(CreateContractRequestDTO postRequestDTO, String memeberId);
@@ -17,4 +14,6 @@ public interface ContractService {
     GetPayResponseDTO getPayDetails(Long contractId, String memberId);
 
     String payForContract(PayRequestDTO payRequestDTO, String memberId);
+
+    GetReserveResponseDTO getReserveDetails(Long contractId);
 }
