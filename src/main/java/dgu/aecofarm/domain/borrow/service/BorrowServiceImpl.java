@@ -38,6 +38,10 @@ public class BorrowServiceImpl implements BorrowService {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
 
+        if (contract.getCategory() != Category.BORROW) {
+            throw new IllegalArgumentException("대여 가능한 물품이 아닙니다.");
+        }
+
         if (contract.getBorrowMember() != null) {
             throw new IllegalArgumentException("이미 대여 요청된 계약입니다.");
         }
@@ -85,14 +89,13 @@ public class BorrowServiceImpl implements BorrowService {
             contract.updateStatus(Status.BEFOREPAY);
             contract.updateSuccessTime(now); // successTime을 현재 시간으로 설정
             alarm.updateStatus(AlarmStatus.ACCEPT);
-            alarm.updateTime(now); // 알람의 시간을 현재 시간으로 설정
         } else {
             contract.updateStatus(Status.NONE);
             contract.updateBorrowMember(null);
             alarm.updateStatus(AlarmStatus.REJECT);
-            alarm.updateTime(now); // 알람의 시간을 현재 시간으로 설정
         }
 
+        alarm.updateTime(now); // 알람의 시간을 현재 시간으로 설정
         contractRepository.save(contract);
         alarmRepository.save(alarm);
 
