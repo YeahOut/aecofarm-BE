@@ -11,4 +11,6 @@ import java.util.List;
 @Repository
 public interface ContractRepository extends JpaRepository<Contract, Long> {
     List<Contract> findByCategoryAndStatus(Category category, Status status);
+
+    List<Contract> findByCategoryAndStatusAndItemItemNameContaining(Category category, Status status, String keyword);
 }

@@ -19,4 +19,6 @@ public interface MemberService {
     String signout(String memberId);
 
     RecommendResponseDTO getRecommand(String memberId);
+
+    SearchResponseDTO searchItems(SearchRequestDTO searchRequestDTO, String memberId);
 }

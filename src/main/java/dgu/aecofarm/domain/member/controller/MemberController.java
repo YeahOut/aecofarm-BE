@@ -97,4 +97,13 @@ public class MemberController {
             return Response.failure(e);
         }
     }
+
+    @PostMapping("/search")
+    public Response<SearchResponseDTO> searchItems(@RequestBody SearchRequestDTO searchRequestDTO, Authentication auth) {
+        try {
+            return Response.success(memberService.searchItems(searchRequestDTO, auth.getName()));
+        } catch (Exception e) {
+            return Response.failure(e);
+        }
+    }
 }
