@@ -6,7 +6,10 @@ import dgu.aecofarm.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface LoveRepository extends JpaRepository<Love, Long> {
     boolean existsByMemberAndItem(Member member, Item item);
+    Optional<Love> findByMemberAndItem(Member member, Item item);
 }
