@@ -77,9 +77,7 @@ public class MyPageServiceImpl implements MyPageService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
 
-        member.setUserName(UpdateProfileDTO.getUserName());
-        member.setEmail(updateProfileDTO.getEmail());
-        member.setImage(updateProfileDTO.getImage());
+        member.updateProfile(updateProfileDTO.getUserName(), updateProfileDTO.getEmail(), updateProfileDTO.getImage());
 
         memberRepository.save(member);
     }
