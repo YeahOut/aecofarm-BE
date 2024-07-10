@@ -84,4 +84,9 @@ public class Member {
         this.point = newPoint;
     }
 
+    public void updateProfile(String userName, String email, String image) {
+        this.userName = userName;
+        this.email = email;
+        this.image = image;
+    }
 }

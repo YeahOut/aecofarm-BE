@@ -70,4 +70,17 @@ public class MyPageServiceImpl implements MyPageService {
 
         return response;
     }
+
+    @Override
+    @Transactional
+    public void updateProfile(Long memberId, UpdateProfileDTO updateProfileDTO) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
+
+        member.setUserName(UpdateProfileDTO.getUserName());
+        member.setEmail(updateProfileDTO.getEmail());
+        member.setImage(updateProfileDTO.getImage());
+
+        memberRepository.save(member);
+    }
 }
