@@ -65,7 +65,7 @@ public class MyPageServiceImpl implements MyPageService {
         }
 
         List<HistoryDTO> historyList = recentContracts.stream().map(contract -> {
-            boolean likeStatus = loveRepository.existsByMemberAndItem(member, contract.getItem());
+            boolean likeStatus = loveRepository.existsByItemAndMember(contract.getItem(), member);
 
             return HistoryDTO.builder()
                     .contractId(contract.getContractId())

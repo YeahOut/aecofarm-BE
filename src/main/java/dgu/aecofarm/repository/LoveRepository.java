@@ -10,6 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface LoveRepository extends JpaRepository<Love, Long> {
-    boolean existsByMemberAndItem(Member member, Item item);
+    boolean existsByItemAndMember(Item item, Member member);
     Optional<Love> findByMemberAndItem(Member member, Item item);
 }
