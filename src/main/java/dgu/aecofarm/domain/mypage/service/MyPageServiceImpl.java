@@ -65,7 +65,7 @@ public class MyPageServiceImpl implements MyPageService {
         }
 
         List<HistoryDTO> historyList = recentContracts.stream().map(contract -> {
-            boolean likeStatus = loveRepository.existsByItemAndMember(contract.getItem(), member);
+            boolean likeStatus = loveRepository.existsByMemberAndItem(member, contract.getItem());
 
             return HistoryDTO.builder()
                     .contractId(contract.getContractId())
@@ -81,6 +81,7 @@ public class MyPageServiceImpl implements MyPageService {
                 .profile(profile)
                 .history(historyList)
                 .build();
+
     }
 
     @Override
