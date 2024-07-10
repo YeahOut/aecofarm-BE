@@ -7,5 +7,5 @@ public class HistoryDTO {
     private int time;
     private int price;
     private Boolean likeStatus;
-    
+
 }
