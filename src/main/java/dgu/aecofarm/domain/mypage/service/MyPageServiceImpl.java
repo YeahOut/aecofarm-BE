@@ -5,6 +5,7 @@ import dgu.aecofarm.dto.mypage.*;
 import dgu.aecofarm.entity.*;
 import dgu.aecofarm.exception.InvalidUserIdException;
 import dgu.aecofarm.repository.ContractRepository;
+import dgu.aecofarm.repository.LoveRepository;
 import dgu.aecofarm.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class MyPageServiceImpl implements MyPageService {
 
     private final MemberRepository memberRepository;
     private final ContractRepository contractRepository;
+    private final LoveRepository loveRepository;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -29,16 +31,28 @@ public class MyPageServiceImpl implements MyPageService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
 
-        ProfileDTO profile = new ProfileDTO();
-        profile.setUserName(member.getUserName());
-        profile.setEmail(member.getEmail());
-        profile.setImage(member.getImage());
-        profile.setPoint(member.getPoint());
+        ProfileDTO profile = ProfileDTO.builder()
+                .userName(member.getUserName())
+                .email(member.getEmail())
+                .image(member.getImage())
+                .point(member.getPoint())
+                .build();
 
+        List<Object> rawRecentList;
         List<Long> recentContractIds;
         try {
-            // recent 필드를 JSON에서 리스트로 변환
-            recentContractIds = objectMapper.readValue(member.getRecent(), List.class);
+            rawRecentList = member.getRecent() == null ? List.of() : objectMapper.readValue(member.getRecent(), List.class);
+            recentContractIds = rawRecentList.stream()
+                    .map(id -> {
+                        if (id instanceof Integer) {
+                            return ((Integer) id).longValue();
+                        } else if (id instanceof Long) {
+                            return (Long) id;
+                        } else {
+                            throw new IllegalArgumentException("유효하지 않은 ID 타입입니다.");
+                        }
+                    })
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             throw new RuntimeException("최근 본 물품을 로드하는데 실패했습니다.", e);
         }
@@ -51,24 +65,22 @@ public class MyPageServiceImpl implements MyPageService {
         }
 
         List<HistoryDTO> historyList = recentContracts.stream().map(contract -> {
-            HistoryDTO history = new HistoryDTO();
-            history.setContractId(contract.getContractId());
-            history.setItemName(contract.getItem().getItemName());
-            history.setItemImage(contract.getItem().getItemImage());
-            history.setTime(contract.getSuccessTime() != null ? contract.getSuccessTime().getHour() : 0);
-            history.setPrice(contract.getItem().getPrice());
-            // Like status 로직 추가 필요
-            history.setLikeStatus(false);
-            return history;
+            boolean likeStatus = loveRepository.existsByItemAndMember(contract.getItem(), member);
+
+            return HistoryDTO.builder()
+                    .contractId(contract.getContractId())
+                    .itemName(contract.getItem().getItemName())
+                    .itemImage(contract.getItem().getItemImage())
+                    .time(contract.getItem().getTime())
+                    .price(contract.getItem().getPrice())
+                    .likeStatus(likeStatus)
+                    .build();
         }).collect(Collectors.toList());
 
-        MyPageResponseDTO response = new MyPageResponseDTO();
-        response.setCode(200);
-        response.setMessage("SUCCESS");
-        response.setProfile(profile);
-        response.setHistory(historyList);
-
-        return response;
+        return MyPageResponseDTO.builder()
+                .profile(profile)
+                .history(historyList)
+                .build();
     }
 
     @Override
