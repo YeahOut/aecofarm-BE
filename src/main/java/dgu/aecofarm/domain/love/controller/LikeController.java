@@ -1,6 +1,7 @@
 package dgu.aecofarm.domain.love.controller;
 
 import dgu.aecofarm.dto.like.AddLikeDTO;
+import dgu.aecofarm.dto.like.LikeListDTO;
 import dgu.aecofarm.entity.Response;
 import dgu.aecofarm.domain.love.service.LikeService;
 import dgu.aecofarm.util.JwtTokenUtil;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/like")
+@RequestMapping("/likes")
 public class LikeController {
 
     private final LikeService likeService;
@@ -26,6 +27,13 @@ public class LikeController {
         Long memberId = extractMemberIdFromToken(authorization);
         likeService.deleteLike(memberId, addLikeDTO);
         return Response.success("좋아요 삭제에 성공하였습니다.");
+    }
+
+    @GetMapping("/list/{itemId}")
+    public Response<LikeListDTO> getLikesList(@RequestHeader("Authorization") String authorization, @PathVariable Long itemId) {
+        Long memberId = extractMemberIdFromToken(authorization);
+        LikeListDTO likeList = likeService.getLikesList(memberId, itemId);
+        return Response.success(likeList);
     }
 
     private Long extractMemberIdFromToken(String token) {
