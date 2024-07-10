@@ -17,4 +17,6 @@ public interface MemberService {
     String findPassword(FindPasswordRequestDTO findPasswordDTO);
 
     String signout(String memberId);
+
+    RecommendResponseDTO getRecommand(String memberId);
 }
