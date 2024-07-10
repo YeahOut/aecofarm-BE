@@ -1,13 +1,11 @@
 package dgu.aecofarm.domain.mypage.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dgu.aecofarm.dto.mypage.*;
 import dgu.aecofarm.entity.*;
 import dgu.aecofarm.exception.InvalidUserIdException;
 import dgu.aecofarm.repository.ContractRepository;
 import dgu.aecofarm.repository.MemberRepository;
-import dgu.aecofarm.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +21,6 @@ public class MyPageServiceImpl implements MyPageService {
 
     private final MemberRepository memberRepository;
     private final ContractRepository contractRepository;
-    private final ItemRepository itemRepository;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -46,8 +43,10 @@ public class MyPageServiceImpl implements MyPageService {
             throw new RuntimeException("최근 본 물품을 로드하는데 실패했습니다.", e);
         }
 
+        // 최근 본 물품을 역순으로 가져오기
         List<Contract> recentContracts = new ArrayList<>();
-        for (Long contractId : recentContractIds) {
+        for (int i = recentContractIds.size() - 1; i >= 0; i--) {
+            Long contractId = recentContractIds.get(i);
             contractRepository.findById(contractId).ifPresent(recentContracts::add);
         }
 
