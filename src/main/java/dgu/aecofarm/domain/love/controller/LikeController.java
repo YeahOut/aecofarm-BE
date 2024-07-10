@@ -18,7 +18,14 @@ public class LikeController {
     public Response<?> addLike(@RequestHeader("Authorization") String authorization, @RequestBody AddLikeDTO addLikeDTO) {
         Long memberId = extractMemberIdFromToken(authorization);
         likeService.addLike(memberId, addLikeDTO);
-        return Response.success("좋아요 누르기에 성공하었습니다.");
+        return Response.success("좋아요 추가에 성공하였습니다.");
+    }
+
+    @PatchMapping("/delete")
+    public Response<?> deleteLike(@RequestHeader("Authorization") String authorization, @RequestBody AddLikeDTO addLikeDTO) {
+        Long memberId = extractMemberIdFromToken(authorization);
+        likeService.deleteLike(memberId, addLikeDTO);
+        return Response.success("좋아요 삭제에 성공하였습니다.");
     }
 
     private Long extractMemberIdFromToken(String token) {
