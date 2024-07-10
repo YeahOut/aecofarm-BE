@@ -73,4 +73,8 @@ public class Contract {
     public void updateStatus(Status status) {
         this.status = status;
     }
+
+    public void updateSuccessTime(LocalDateTime now) {
+        this.successTime = now;
+    }
 }

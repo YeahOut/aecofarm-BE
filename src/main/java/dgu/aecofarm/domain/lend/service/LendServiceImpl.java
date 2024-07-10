@@ -40,7 +40,7 @@ public class LendServiceImpl implements LendService {
                 .category(Category.LEND)
                 .borrowMember(contract.getBorrowMember())
                 .lendMember(member)
-                .alarmStatus(alarmStatus.REQUEST)
+                .alarmStatus(AlarmStatus.REQUEST)
                 .time(LocalDateTime.now())
                 .build();
 
