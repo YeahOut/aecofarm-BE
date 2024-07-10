@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LoveRepository extends JpaRepository<Love, Long> {
-    boolean existsByItemAndMember(Item item, Member member);
+    boolean existsByMemberAndItem(Member member, Item item);
 }

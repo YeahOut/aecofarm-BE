@@ -11,7 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @Table(name = "love")
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)public class Love {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+
+public class Love {
 
     // 좋아요 아이디
     @Id
