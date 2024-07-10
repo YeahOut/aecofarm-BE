@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class LikeServiceImpl implements LikeService {
@@ -29,15 +31,28 @@ public class LikeServiceImpl implements LikeService {
         Item item = itemRepository.findById(addLikeDTO.getItemId())
                 .orElseThrow(() -> new IllegalArgumentException("유효한 물품 ID가 아닙니다."));
 
-        if (loveRepository.existsByMemberAndItem(member, item)) {
-            throw new IllegalArgumentException("이미 좋아요를 누른 물품입니다.");
+        Optional<Love> existingLove = loveRepository.findByMemberAndItem(member, item);
+
+        if (!existingLove.isPresent()) {
+            Love love = Love.builder()
+                    .member(member)
+                    .item(item)
+                    .build();
+            loveRepository.save(love);
         }
+    }
 
-        Love love = Love.builder()
-                .member(member)
-                .item(item)
-                .build();
+    @Override
+    @Transactional
+    public void deleteLike(Long memberId, AddLikeDTO addLikeDTO) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
 
-        loveRepository.save(love);
+        Item item = itemRepository.findById(addLikeDTO.getItemId())
+                .orElseThrow(() -> new IllegalArgumentException("유효한 물품 ID가 아닙니다."));
+
+        Optional<Love> existingLove = loveRepository.findByMemberAndItem(member, item);
+
+        existingLove.ifPresent(loveRepository::delete);
     }
 }
