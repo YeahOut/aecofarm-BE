@@ -2,6 +2,7 @@ package dgu.aecofarm.domain.borrow.controller;
 
 import dgu.aecofarm.domain.borrow.service.BorrowService;
 import dgu.aecofarm.dto.borrow.AcceptRejectRequestDTO;
+import dgu.aecofarm.dto.borrow.SortType;
 import dgu.aecofarm.dto.contract.CreateContractRequestDTO;
 import dgu.aecofarm.entity.Response;
 import lombok.RequiredArgsConstructor;
@@ -32,4 +33,14 @@ public class BorrowController {
             return Response.failure(e);
         }
     }
+
+    @GetMapping("/list")
+    public Response<?> getBorrowList(@RequestParam(value = "sortType", required = false, defaultValue = "NEWEST") SortType sortType, Authentication auth) {
+        try {
+            return Response.success(borrowService.getBorrowList(auth.getName(), sortType));
+        } catch (Exception e) {
+            return Response.failure(e);
+        }
+    }
+
 }

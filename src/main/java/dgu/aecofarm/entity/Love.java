@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 
     // 회원 아이디
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "memberId", nullable = false)
     private Member member;
 
     // 물품 아이디
