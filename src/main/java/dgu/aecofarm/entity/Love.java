@@ -2,12 +2,10 @@ package dgu.aecofarm.entity;
 
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
+@Data
 @Builder
 @Table(name = "love")
 @AllArgsConstructor
