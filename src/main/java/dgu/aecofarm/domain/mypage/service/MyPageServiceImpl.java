@@ -82,4 +82,15 @@ public class MyPageServiceImpl implements MyPageService {
                 .history(historyList)
                 .build();
     }
+
+    @Override
+    @Transactional
+    public void updateProfile(Long memberId, UpdateProfileDTO updateProfileDTO) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
+
+        member.updateProfile(updateProfileDTO.getUserName(), updateProfileDTO.getEmail(), updateProfileDTO.getImage());
+
+        memberRepository.save(member);
+    }
 }
