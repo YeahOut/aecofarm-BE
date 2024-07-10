@@ -46,6 +46,12 @@ public class BorrowServiceImpl implements BorrowService {
             throw new IllegalArgumentException("이미 대여 요청된 계약입니다.");
         }
 
+        // 포인트 확인
+        Item item = contract.getItem();
+        if (member.getPoint() < item.getPrice()) {
+            throw new IllegalArgumentException("포인트가 부족합니다.");
+        }
+
         contract.updateBorrowMember(member);
         contract.updateStatus(Status.REQUESTED);
         contractRepository.save(contract);
