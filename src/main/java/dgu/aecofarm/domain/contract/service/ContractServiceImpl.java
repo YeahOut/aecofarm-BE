@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dgu.aecofarm.dto.contract.ContractDetailResponseDTO;
 import dgu.aecofarm.dto.contract.CreateContractRequestDTO;
 import dgu.aecofarm.dto.contract.GetPayResponseDTO;
+import dgu.aecofarm.dto.contract.PayRequestDTO;
 import dgu.aecofarm.entity.*;
 import dgu.aecofarm.exception.InvalidUserIdException;
+import dgu.aecofarm.repository.AlarmRepository;
 import dgu.aecofarm.repository.ContractRepository;
 import dgu.aecofarm.repository.ItemRepository;
 import dgu.aecofarm.repository.MemberRepository;
@@ -26,6 +28,7 @@ public class ContractServiceImpl implements ContractService {
     private final ContractRepository contractRepository;
     private final ItemRepository itemRepository;
     private final MemberRepository memberRepository;
+    private final AlarmRepository alarmRepository;
     private final ObjectMapper objectMapper;
 
     @Transactional
@@ -224,5 +227,55 @@ public class ContractServiceImpl implements ContractService {
                 .contractTime(item.getContractTime())
                 .itemHash(itemHashList)
                 .build();
+    }
+
+    @Transactional
+    public String payForContract(PayRequestDTO payRequestDTO, String memberId) {
+        Member member = memberRepository.findById(Long.valueOf(memberId))
+                .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
+
+        Contract contract = contractRepository.findById(payRequestDTO.getContractId())
+                .orElseThrow(() -> new IllegalArgumentException("유효한 계약 ID가 아닙니다."));
+
+        // status가 BEFOREPAY가 아닐 경우
+        if (contract.getStatus() != Status.BEFOREPAY) {
+            throw new IllegalArgumentException("결제 가능한 상태가 아닙니다.");
+        }
+
+        Member lendMember = contract.getLendMember();
+        Member borrowMember = contract.getBorrowMember();
+
+        // 사용자가 해당 계약에 대한 권한이 있는지 확인
+        if ((contract.getCategory() == Category.BORROW && !borrowMember.equals(member)) ||
+                (contract.getCategory() == Category.LEND && !borrowMember.equals(member))) {
+            throw new IllegalArgumentException("해당 contract에 대한 권한이 없습니다.");
+        }
+
+        // 포인트 차감 및 적립
+        int point = payRequestDTO.getPoint();
+        if (borrowMember.getPoint() < point) {
+            throw new IllegalArgumentException("포인트가 부족합니다.");
+        }
+
+        lendMember.updatePoint(lendMember.getPoint() + point);
+        borrowMember.updatePoint(borrowMember.getPoint() - point);
+
+        memberRepository.save(lendMember);
+        memberRepository.save(borrowMember);
+
+        // contract 상태 업데이트 및 alarm 상태 업데이트
+        contract.updateStatus(Status.COMPLETED);
+        contractRepository.save(contract);
+
+        Alarm alarm = alarmRepository.findByContract(contract)
+                .orElseThrow(() -> new IllegalArgumentException("유효한 알람 ID가 아닙니다."));
+
+        LocalDateTime now = LocalDateTime.now();
+
+        alarm.updateStatus(AlarmStatus.COMPLETE);
+        alarm.updateTime(now); // 알람의 시간을 현재 시간으로 설정
+        alarmRepository.save(alarm);
+
+        return "결제가 완료되었습니다.";
     }
 }
