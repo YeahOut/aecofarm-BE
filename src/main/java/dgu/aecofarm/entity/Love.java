@@ -27,4 +27,9 @@ public class Love {
     @ManyToOne
     @JoinColumn(name = "itemId", nullable = false)
     private Item item;
+
+    // contract 아이디
+    @ManyToOne
+    @JoinColumn(name = "contractId", nullable = false)
+    private Contract contract;
 }
