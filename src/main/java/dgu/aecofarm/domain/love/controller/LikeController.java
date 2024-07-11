@@ -1,6 +1,6 @@
 package dgu.aecofarm.domain.love.controller;
 
-import dgu.aecofarm.dto.love.AddLikeDTO;
+
 import dgu.aecofarm.dto.love.LikeListDTO;
 import dgu.aecofarm.entity.Response;
 import dgu.aecofarm.domain.love.service.LikeService;
@@ -15,24 +15,24 @@ public class LikeController {
 
     private final LikeService likeService;
 
-    @PatchMapping("/add")
-    public Response<?> addLike(@RequestHeader("Authorization") String authorization, @RequestBody AddLikeDTO addLikeDTO) {
+    @PostMapping("/add/{contractId}")
+    public Response<?> addLike(@PathVariable("contractId") Long contractId, @RequestHeader("Authorization") String authorization) {
         Long memberId = extractMemberIdFromToken(authorization);
-        likeService.addLike(memberId, addLikeDTO);
+        likeService.addLike(memberId, contractId);
         return Response.success("좋아요 추가에 성공하였습니다.");
     }
 
-    @PatchMapping("/delete")
-    public Response<?> deleteLike(@RequestHeader("Authorization") String authorization, @RequestBody AddLikeDTO addLikeDTO) {
+    @DeleteMapping("/delete/{contractId}")
+    public Response<?> deleteLike(@PathVariable("contractId") Long contractId, @RequestHeader("Authorization") String authorization) {
         Long memberId = extractMemberIdFromToken(authorization);
-        likeService.deleteLike(memberId, addLikeDTO);
+        likeService.deleteLike(memberId, contractId);
         return Response.success("좋아요 삭제에 성공하였습니다.");
     }
 
-    @GetMapping("/list/{itemId}")
-    public Response<LikeListDTO> getLikesList(@RequestHeader("Authorization") String authorization, @PathVariable Long itemId) {
+    @GetMapping("/list")
+    public Response<LikeListDTO> getLikesList(@RequestHeader("Authorization") String authorization) {
         Long memberId = extractMemberIdFromToken(authorization);
-        LikeListDTO likeList = likeService.getLikesList(memberId, itemId);
+        LikeListDTO likeList = likeService.getLikesList(memberId);
         return Response.success(likeList);
     }
 
