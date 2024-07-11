@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -105,6 +106,7 @@ public class MyPageServiceImpl implements MyPageService {
 
         List<MyPageContractListDTO.LendingItem> lendingItems = contracts.stream()
                 .filter(contract -> contract.getCategory() == Category.LEND)
+                .sorted(Comparator.comparing(contract -> contract.getItem().getCreatedAt(), Comparator.reverseOrder()))
                 .map(contract -> {
             List<String> itemHashList;
             try {
@@ -128,6 +130,7 @@ public class MyPageServiceImpl implements MyPageService {
 
         List<MyPageContractListDTO.BorrowingItem> borrowingItems = contracts.stream()
                 .filter(contract -> contract.getCategory() == Category.BORROW)
+                .sorted(Comparator.comparing(contract -> contract.getItem().getCreatedAt(), Comparator.reverseOrder()))
                 .map(contract -> {
                     List<String> itemHashList;
                     try {
