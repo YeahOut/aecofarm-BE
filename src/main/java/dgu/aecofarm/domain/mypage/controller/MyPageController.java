@@ -6,6 +6,7 @@ import dgu.aecofarm.entity.Response;
 import dgu.aecofarm.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,9 +23,11 @@ public class MyPageController {
     }
 
     @PatchMapping("/update")
-    public Response<?> updateProfile(@RequestHeader("Authorization") String authorization, @RequestBody UpdateProfileDTO updateProfileDTO) {
+    public Response<?> updateProfile(@RequestHeader("Authorization") String authorization,
+                                     @RequestPart("updateProfileData") UpdateProfileDTO updateProfileDTO,
+                                     @RequestPart("file") MultipartFile file) {
         Long memberId = extractMemberIdFromToken(authorization);
-        myPageService.updateProfile(memberId, updateProfileDTO);
+        myPageService.updateProfile(memberId, updateProfileDTO, file);
         return Response.success("마이페이지 수정이 완료되었습니다.");
     }
 

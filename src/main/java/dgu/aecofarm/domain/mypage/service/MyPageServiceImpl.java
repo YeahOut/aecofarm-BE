@@ -1,5 +1,8 @@
 package dgu.aecofarm.domain.mypage.service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dgu.aecofarm.dto.mypage.*;
 import dgu.aecofarm.entity.*;
@@ -8,13 +11,16 @@ import dgu.aecofarm.repository.ContractRepository;
 import dgu.aecofarm.repository.LoveRepository;
 import dgu.aecofarm.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +31,11 @@ public class MyPageServiceImpl implements MyPageService {
     private final ContractRepository contractRepository;
     private final LoveRepository loveRepository;
     private final ObjectMapper objectMapper;
+
+    private final AmazonS3 amazonS3;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucketName;
 
     @Override
     @Transactional
@@ -87,13 +98,44 @@ public class MyPageServiceImpl implements MyPageService {
 
     @Override
     @Transactional
-    public void updateProfile(Long memberId, UpdateProfileDTO updateProfileDTO) {
+    public void updateProfile(Long memberId, UpdateProfileDTO updateProfileDTO, MultipartFile file) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
 
-        member.updateProfile(updateProfileDTO.getUserName(), updateProfileDTO.getEmail(), updateProfileDTO.getImage());
+        String oldImageUrl = member.getImage();
+        String imageUrl = oldImageUrl;
+        if (file != null && !file.isEmpty()) {
+            imageUrl = uploadFileToS3(file);
+            if (oldImageUrl != null && !oldImageUrl.isEmpty()) {
+                deleteFileFromS3(oldImageUrl);
+            }
+        }
+
+        member.updateProfile(updateProfileDTO.getUserName(), updateProfileDTO.getEmail(), imageUrl);
 
         memberRepository.save(member);
+    }
+
+    private String uploadFileToS3(MultipartFile file) {
+        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(file.getSize());
+        metadata.setContentType(file.getContentType());  // Content-Type 설정
+        metadata.setContentDisposition("inline");  // Content-Disposition 설정
+
+        try {
+            amazonS3.putObject(bucketName, fileName, file.getInputStream(), metadata);
+            amazonS3.setObjectAcl(bucketName, fileName, CannedAccessControlList.PublicRead);  // Set ACL to public-read
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload file", e);
+        }
+
+        return amazonS3.getUrl(bucketName, fileName).toString();
+    }
+
+    private void deleteFileFromS3(String fileUrl) {
+        String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+        amazonS3.deleteObject(bucketName, fileName);
     }
 
     @Override
