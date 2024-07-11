@@ -14,6 +14,6 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     List<Contract> findByCategoryAndStatus(Category category, Status status);
 
     List<Contract> findByCategoryAndStatusAndItemItemNameContaining(Category category, Status status, String keyword);
-    List<Contract> findByLendMember(Member member);
-    List<Contract> findByBorrowMember(Member member);
+    List<Contract> findByCategoryAndLendMember(Category category,Member member);
+    List<Contract> findByCategoryAndBorrowMember(Category category,Member member);
 }
