@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MyPageContractsDTO {
+public class MyPageContractListDTO {
     private List<LendingItem> lendingItems;
     private List<BorrowingItem> borrowingItems;
 

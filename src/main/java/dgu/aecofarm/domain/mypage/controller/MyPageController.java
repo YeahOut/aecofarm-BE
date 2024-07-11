@@ -31,7 +31,7 @@ public class MyPageController {
     @GetMapping("/contract/list")
     public Response<?> getMyPageContracts(@RequestHeader("Authorization") String authorization) {
         Long memberId = extractMemberIdFromToken(authorization);
-        MyPageContractsDTO response = myPageService.getMyPageContracts(memberId);
+        MyPageContractListDTO response = myPageService.getMyPageContracts(memberId);
         return Response.success(response);
     }
 

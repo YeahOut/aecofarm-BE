@@ -97,13 +97,13 @@ public class MyPageServiceImpl implements MyPageService {
 
     @Override
     @Transactional(readOnly = true)
-    public MyPageContractsDTO getMyPageContracts(Long memberId) {
+    public MyPageContractListDTO getMyPageContracts(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
 
         List<Contract> contracts = contractRepository.findByMember(member);
 
-        List<MyPageContractsDTO.LendingItem> lendingItems = contracts.stream()
+        List<MyPageContractListDTO.LendingItem> lendingItems = contracts.stream()
                 .filter(contract -> contract.getCategory() == Category.LEND)
                 .map(contract -> {
             List<String> itemHashList;
@@ -112,7 +112,7 @@ public class MyPageServiceImpl implements MyPageService {
             } catch (IOException e) {
                 throw new RuntimeException("아이템 해시를 리스트로 변환하는데 실패했습니다.", e);
             }
-            return MyPageContractsDTO.LendingItem.builder()
+            return MyPageContractListDTO.LendingItem.builder()
                     .contractId(contract.getContractId())
                     .itemName(contract.getItem().getItemName())
                     .price(contract.getItem().getPrice())
@@ -126,7 +126,7 @@ public class MyPageServiceImpl implements MyPageService {
         })
                 .collect(Collectors.toList());
 
-        List<MyPageContractsDTO.BorrowingItem> borrowingItems = contracts.stream()
+        List<MyPageContractListDTO.BorrowingItem> borrowingItems = contracts.stream()
                 .filter(contract -> contract.getCategory() == Category.BORROW)
                 .map(contract -> {
                     List<String> itemHashList;
@@ -135,7 +135,7 @@ public class MyPageServiceImpl implements MyPageService {
                     } catch (IOException e) {
                         throw new RuntimeException("아이템 해시를 리스트로 변환하는데 실패했습니다.", e);
                     }
-                    return MyPageContractsDTO.BorrowingItem.builder()
+                    return MyPageContractListDTO.BorrowingItem.builder()
                             .contractId(contract.getContractId())
                             .itemName(contract.getItem().getItemName())
                             .itemImage(contract.getItem().getItemImage())
@@ -150,7 +150,7 @@ public class MyPageServiceImpl implements MyPageService {
                 })
                 .collect(Collectors.toList());
 
-        return MyPageContractsDTO.builder()
+        return MyPageContractListDTO.builder()
                 .lendingItems(lendingItems)
                 .borrowingItems(borrowingItems)
                 .build();
