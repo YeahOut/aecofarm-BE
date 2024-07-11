@@ -1,16 +1,14 @@
 package dgu.aecofarm.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Builder
+@Getter
 @Table(name = "contract")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -23,12 +21,12 @@ public class Contract {
 
     // 빌려주는 사람
     @ManyToOne
-    @JoinColumn(name = "lendId", nullable = false)
+    @JoinColumn(name = "lendId")
     private Member lendMember;
 
     // 빌리는 사람
     @ManyToOne
-    @JoinColumn(name = "borrowId", nullable = false)
+    @JoinColumn(name = "borrowId")
     private Member borrowMember;
 
     // 물품 아이디
@@ -54,4 +52,32 @@ public class Contract {
 
     @OneToMany(mappedBy = "contract")
     private List<Alarm> alarms;
+
+    @OneToMany(mappedBy = "contract")
+    private List<Love> likes;
+
+    // 수정 메서드
+    public void updateItem(Item item) {
+        this.item = item;
+    }
+
+    public void updateCategory(Category category) {
+        this.category = category;
+    }
+
+    public void updateBorrowMember(Member member) {
+        this.borrowMember = member;
+    }
+
+    public void updateLendMember(Member member) {
+        this.lendMember = member;
+    }
+
+    public void updateStatus(Status status) {
+        this.status = status;
+    }
+
+    public void updateSuccessTime(LocalDateTime now) {
+        this.successTime = now;
+    }
 }

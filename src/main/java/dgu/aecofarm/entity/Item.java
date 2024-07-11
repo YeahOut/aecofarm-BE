@@ -1,16 +1,14 @@
 package dgu.aecofarm.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Builder
+@Getter
 @Table(name = "item")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -39,7 +37,6 @@ public class Item {
     private String itemPlace;
 
     // 물품 해시태그
-    @Column(columnDefinition = "json")
     private String itemHash;
 
     // 대여 가능 시간
@@ -52,6 +49,7 @@ public class Item {
     private String kakao;
 
     // 물품 조회 횟수
+    @Column(nullable = false)
     private Integer click;
 
     // 글 작성 시간
@@ -62,4 +60,45 @@ public class Item {
 
     @OneToMany(mappedBy = "item")
     private List<Contract> contracts;
+
+    // 수정 메서드
+    public void updateItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
+    public void updatePrice(Integer price) {
+        this.price = price;
+    }
+
+    public void updateItemImage(String itemImage) {
+        this.itemImage = itemImage;
+    }
+
+    public void updateItemContents(String itemContents) {
+        this.itemContents = itemContents;
+    }
+
+    public void updateItemPlace(String itemPlace) {
+        this.itemPlace = itemPlace;
+    }
+
+    public void updateItemHash(String itemHash) {
+        this.itemHash = itemHash;
+    }
+
+    public void updateTime(Integer time) {
+        this.time = time;
+    }
+
+    public void updateContractTime(Integer contractTime) {
+        this.contractTime = contractTime;
+    }
+
+    public void updateKakao(String kakao) {
+        this.kakao = kakao;
+    }
+
+    public void updateClickCount() {
+        this.click += 1;
+    }
 }

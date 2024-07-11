@@ -1,13 +1,11 @@
 package dgu.aecofarm.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Entity
 @Builder
 @Table(name = "alarm")
@@ -29,9 +27,13 @@ public class Alarm {
     @Column(nullable = false)
     private LocalDateTime time;
 
+    // 요청 상태
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private alarmStatus alarmStatus;
+    private AlarmStatus alarmStatus;
 
+    // 카테고리 (빌려주기, 빌리기 게시판)
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Category category;
 
@@ -44,4 +46,12 @@ public class Alarm {
     @ManyToOne
     @JoinColumn(name = "borrowId", nullable = false)
     private Member borrowMember;
+
+    public void updateStatus(AlarmStatus status) {
+        this.alarmStatus = status;
+    }
+
+    public void updateTime(LocalDateTime now) {
+        this.time = now;
+    }
 }
