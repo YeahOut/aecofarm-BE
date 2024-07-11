@@ -28,10 +28,10 @@ public class LikeController {
         return Response.success("좋아요 삭제에 성공하였습니다.");
     }
 
-    @GetMapping("/list/{contractId}")
-    public Response<LikeListDTO> getLikesList(@PathVariable("contractId") Long contractId, @RequestHeader("Authorization") String authorization) {
+    @GetMapping("/list")
+    public Response<LikeListDTO> getLikesList(@RequestHeader("Authorization") String authorization) {
         Long memberId = extractMemberIdFromToken(authorization);
-        LikeListDTO likeList = likeService.getLikesList(memberId, contractId);
+        LikeListDTO likeList = likeService.getLikesList(memberId);
         return Response.success(likeList);
     }
 

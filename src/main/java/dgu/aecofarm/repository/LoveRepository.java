@@ -14,4 +14,6 @@ public interface LoveRepository extends JpaRepository<Love, Long> {
     boolean existsByItemAndMember(Item item, Member member);
     Optional<Love> findByMemberAndItem(Member member, Item item);
     List<Love> findByItem(Item item);
+
+    List<Love> findByMember(Member member);
 }

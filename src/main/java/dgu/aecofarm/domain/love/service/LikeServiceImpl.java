@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -44,6 +45,7 @@ public class LikeServiceImpl implements LikeService {
         if (!existingLove.isPresent()) {
             Love love = Love.builder()
                     .member(member)
+                    .contract(contract)
                     .item(item)
                     .build();
             loveRepository.save(love);
@@ -74,35 +76,35 @@ public class LikeServiceImpl implements LikeService {
         }
     }
 
-    @Override
     @Transactional(readOnly = true)
-    public LikeListDTO getLikesList(Long memberId, Long contractId) {
+    public LikeListDTO getLikesList(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
 
-        Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new IllegalArgumentException("유효한 계약 ID가 아닙니다."));
-
-        Item item = contract.getItem();
-
-        List<Love> loves = loveRepository.findByItem(item);
+        List<Love> loves = loveRepository.findByMember(member);
 
         List<LikeListDTO.LendingItem> lendingItems = loves.stream()
+                .filter(love -> love.getContract().getCategory() == Category.LEND)
+                .filter(love -> love.getContract().getStatus() == Status.NONE)
                 .map(love -> new LikeListDTO.LendingItem(
-                        love.getLikeId(),
+                        love.getContract().getContractId(),
                         love.getItem().getItemName(),
                         love.getItem().getPrice(),
                         love.getItem().getTime()))
                 .collect(Collectors.toList());
+        Collections.reverse(lendingItems);
 
         List<LikeListDTO.BorrowingItem> borrowingItems = loves.stream()
+                .filter(love -> love.getContract().getCategory() == Category.BORROW)
+                .filter(love -> love.getContract().getStatus() == Status.NONE)
                 .map(love -> new LikeListDTO.BorrowingItem(
-                        love.getLikeId(),
+                        love.getContract().getContractId(),
                         love.getItem().getItemName(),
                         love.getItem().getItemImage(),
                         love.getItem().getPrice(),
                         love.getItem().getTime()))
                 .collect(Collectors.toList());
+        Collections.reverse(borrowingItems);
 
         return new LikeListDTO(lendingItems, borrowingItems);
     }
