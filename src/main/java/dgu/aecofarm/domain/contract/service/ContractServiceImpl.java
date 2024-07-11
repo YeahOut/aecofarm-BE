@@ -29,7 +29,7 @@ public class ContractServiceImpl implements ContractService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public String createContract(CreateContractRequestDTO createContractRequestDTO, String memberId) {
+    public String createContract(String imageUrl, CreateContractRequestDTO createContractRequestDTO, String memberId) {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
 
@@ -43,7 +43,7 @@ public class ContractServiceImpl implements ContractService {
         Item item = Item.builder()
                 .itemName(createContractRequestDTO.getItemName())
                 .price(createContractRequestDTO.getPrice())
-                .itemImage(createContractRequestDTO.getItemImage())
+                .itemImage(imageUrl)
                 .itemContents(createContractRequestDTO.getItemContents())
                 .itemPlace(createContractRequestDTO.getItemPlace())
                 .itemHash(itemHashJson)
@@ -70,7 +70,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Transactional
-    public String updateContract(Long contractId, CreateContractRequestDTO createContractRequestDTO, String memberId) {
+    public String updateContract(String imageUrl, Long contractId, CreateContractRequestDTO createContractRequestDTO, String memberId) {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new IllegalArgumentException("유효한 계약 ID가 아닙니다."));
 
@@ -84,7 +84,7 @@ public class ContractServiceImpl implements ContractService {
         Item item = contract.getItem();
         item.updateItemName(createContractRequestDTO.getItemName());
         item.updatePrice(createContractRequestDTO.getPrice());
-        item.updateItemImage(createContractRequestDTO.getItemImage());
+        item.updateItemImage(imageUrl);
         item.updateItemContents(createContractRequestDTO.getItemContents());
         item.updateItemPlace(createContractRequestDTO.getItemPlace());
         item.updateItemHash(itemHashJson);

@@ -3,9 +3,9 @@ package dgu.aecofarm.domain.contract.service;
 import dgu.aecofarm.dto.contract.*;
 
 public interface ContractService {
-    String createContract(CreateContractRequestDTO postRequestDTO, String memeberId);
+    String createContract(String imageUrl, CreateContractRequestDTO postRequestDTO, String memeberId);
 
-    String  updateContract(Long contractId, CreateContractRequestDTO postRequestDTO, String memeberId);
+    String  updateContract(String imageUrl, Long contractId, CreateContractRequestDTO postRequestDTO, String memeberId);
 
     String deleteContract(Long contractId, String memberId);
 
