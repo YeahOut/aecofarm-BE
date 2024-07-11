@@ -102,16 +102,14 @@ public class MyPageServiceImpl implements MyPageService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
 
-        // 빌린 멤버와 빌려준 멤버의 계약 리스트를 가져옴
-        List<Contract> lendContracts = contractRepository.findByLendMember(member);
-        List<Contract> borrowContracts = contractRepository.findByBorrowMember(member);
-
-        // 두 리스트를 합침
+        List<Contract> lendContracts = contractRepository.findByCategoryAndLendMember(Category.BORROW, member);
+        List<Contract> borrowContracts = contractRepository.findByCategoryAndBorrowMember(Category.LEND, member);
         List<Contract> contracts = new ArrayList<>();
         contracts.addAll(lendContracts);
         contracts.addAll(borrowContracts);
 
-        List<MyPageContractListDTO.LendingItem> lendingItems = lendContracts.stream()
+        List<MyPageContractListDTO.LendingItem> lendingItems = contracts.stream()
+                .filter(contract -> contract.getCategory() == Category.LEND)
                 .sorted(Comparator.comparing(contract -> contract.getItem().getCreatedAt(), Comparator.reverseOrder()))
                 .map(contract -> {
                     List<String> itemHashList;
@@ -134,7 +132,8 @@ public class MyPageServiceImpl implements MyPageService {
                 })
                 .collect(Collectors.toList());
 
-        List<MyPageContractListDTO.BorrowingItem> borrowingItems = borrowContracts.stream()
+        List<MyPageContractListDTO.BorrowingItem> borrowingItems = contracts.stream()
+                .filter(contract -> contract.getCategory() == Category.BORROW)
                 .sorted(Comparator.comparing(contract -> contract.getItem().getCreatedAt(), Comparator.reverseOrder()))
                 .map(contract -> {
                     List<String> itemHashList;
