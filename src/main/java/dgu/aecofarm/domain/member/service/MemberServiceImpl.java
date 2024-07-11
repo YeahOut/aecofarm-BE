@@ -1,5 +1,8 @@
 package dgu.aecofarm.domain.member.service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dgu.aecofarm.dto.member.*;
 import dgu.aecofarm.entity.*;
@@ -10,8 +13,10 @@ import dgu.aecofarm.repository.LoveRepository;
 import dgu.aecofarm.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -20,6 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,13 +39,17 @@ public class MemberServiceImpl implements MemberService {
     private final ContractRepository contractRepository;
     private final LoveRepository loveRepository;
 
-    public String signup(SignupRequestDTO signupRequestDTO) {
+    private final AmazonS3 amazonS3;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucketName;
+
+    public String signup(SignupRequestDTO signupRequestDTO, String imageUrl) {
         String email = signupRequestDTO.getEmail();
         String userName = signupRequestDTO.getUserName();
         String password = toSHA256(signupRequestDTO.getPassword());
         String phone = signupRequestDTO.getPhone();
         int schoolNum = signupRequestDTO.getSchoolNum();
-        String image = signupRequestDTO.getImage();
 
         Member checkDuplicate = memberRepository.findMemberByEmail(email);
         if (checkDuplicate != null) {
@@ -52,15 +62,31 @@ public class MemberServiceImpl implements MemberService {
                 .password(password)
                 .phone(phone)
                 .schoolNum(schoolNum)
-                .image(image)
+                .image(imageUrl)
                 .point(3000)
                 .build();
         memberRepository.save(member);
 
         // 회원가입 시 기본 포인트 3000
 
-
         return "회원가입 성공";
+    }
+
+    public String uploadFile(MultipartFile file) {
+        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(file.getSize());
+        metadata.setContentType(file.getContentType());  // Content-Type 설정
+        metadata.setContentDisposition("inline");  // Content-Disposition 설정
+
+        try {
+            amazonS3.putObject(bucketName, fileName, file.getInputStream(), metadata);
+            amazonS3.setObjectAcl(bucketName, fileName, CannedAccessControlList.PublicRead);  // Set ACL to public-read
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload file", e);
+        }
+
+        return amazonS3.getUrl(bucketName, fileName).toString();
     }
 
     public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
