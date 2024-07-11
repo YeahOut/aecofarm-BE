@@ -22,4 +22,5 @@ public class ContractDetailResponseDTO {
     private Integer time;
     private Integer contractTime;
     private String kakao;
+    private LocalDateTime createdAt;
 }
