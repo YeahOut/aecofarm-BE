@@ -183,6 +183,7 @@ public class ContractServiceImpl implements ContractService {
                 .time(item.getTime())
                 .contractTime(item.getContractTime())
                 .kakao(item.getKakao())
+                .createdAt(item.getCreatedAt())
                 .build();
     }
 
