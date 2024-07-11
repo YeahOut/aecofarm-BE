@@ -1,6 +1,5 @@
 package dgu.aecofarm.domain.love.controller;
 
-import dgu.aecofarm.dto.like.AddLikeDTO;
 import dgu.aecofarm.dto.like.LikeListDTO;
 import dgu.aecofarm.entity.Response;
 import dgu.aecofarm.domain.love.service.LikeService;
@@ -15,24 +14,24 @@ public class LikeController {
 
     private final LikeService likeService;
 
-    @PostMapping("/add")
-    public Response<?> addLike(@RequestHeader("Authorization") String authorization, @RequestBody AddLikeDTO addLikeDTO) {
+    @PostMapping("/add/{contractId}")
+    public Response<?> addLike(@PathVariable("contractId") Long contractId, @RequestHeader("Authorization") String authorization) {
         Long memberId = extractMemberIdFromToken(authorization);
-        likeService.addLike(memberId, addLikeDTO);
+        likeService.addLike(memberId, contractId);
         return Response.success("좋아요 추가에 성공하였습니다.");
     }
 
-    @DeleteMapping("/delete")
-    public Response<?> deleteLike(@RequestHeader("Authorization") String authorization, @RequestBody AddLikeDTO addLikeDTO) {
+    @DeleteMapping("/delete/{contractId}")
+    public Response<?> deleteLike(@PathVariable("contractId") Long contractId, @RequestHeader("Authorization") String authorization) {
         Long memberId = extractMemberIdFromToken(authorization);
-        likeService.deleteLike(memberId, addLikeDTO);
+        likeService.deleteLike(memberId, contractId);
         return Response.success("좋아요 삭제에 성공하였습니다.");
     }
 
-    @GetMapping("/list/{itemId}")
-    public Response<LikeListDTO> getLikesList(@RequestHeader("Authorization") String authorization, @PathVariable Long itemId) {
+    @GetMapping("/list/{contractId}")
+    public Response<LikeListDTO> getLikesList(@PathVariable("contractId") Long contractId, @RequestHeader("Authorization") String authorization) {
         Long memberId = extractMemberIdFromToken(authorization);
-        LikeListDTO likeList = likeService.getLikesList(memberId, itemId);
+        LikeListDTO likeList = likeService.getLikesList(memberId, contractId);
         return Response.success(likeList);
     }
 
