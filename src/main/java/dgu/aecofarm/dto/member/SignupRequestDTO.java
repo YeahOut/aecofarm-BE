@@ -8,6 +8,5 @@ public class SignupRequestDTO {
     private String userName;
     private String password;
     private String phone;
-    private Integer schoolNum;
-    private String image;
+    private int schoolNum;
 }

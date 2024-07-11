@@ -10,6 +10,7 @@ import dgu.aecofarm.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,9 +24,11 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/signup")
-    public Response<?> signup(@RequestBody SignupRequestDTO signupRequestDTO) {
+    public Response<?> signup(@RequestPart("signupData") SignupRequestDTO signupRequestDTO,
+                              @RequestPart("file") MultipartFile file) {
         try {
-            return Response.success(memberService.signup(signupRequestDTO));
+            String imageUrl = memberService.uploadFile(file);
+            return Response.success(memberService.signup(signupRequestDTO, imageUrl));
         } catch (Exception e) {
             return Response.failure(e);
         }
