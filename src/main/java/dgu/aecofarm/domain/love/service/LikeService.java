@@ -1,7 +1,7 @@
 package dgu.aecofarm.domain.love.service;
 
-import dgu.aecofarm.dto.like.AddLikeDTO;
-import dgu.aecofarm.dto.like.LikeListDTO;
+import dgu.aecofarm.dto.love.AddLikeDTO;
+import dgu.aecofarm.dto.love.LikeListDTO;
 
 public interface LikeService {
     void addLike(Long memberId, AddLikeDTO addLikeDTO);

@@ -1,4 +1,4 @@
-package dgu.aecofarm.dto.like;
+package dgu.aecofarm.dto.love;
 
 import lombok.Builder;
 import lombok.Data;
