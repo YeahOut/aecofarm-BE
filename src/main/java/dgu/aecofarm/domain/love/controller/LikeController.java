@@ -15,14 +15,14 @@ public class LikeController {
 
     private final LikeService likeService;
 
-    @PatchMapping("/add")
+    @PostMapping("/add")
     public Response<?> addLike(@RequestHeader("Authorization") String authorization, @RequestBody AddLikeDTO addLikeDTO) {
         Long memberId = extractMemberIdFromToken(authorization);
         likeService.addLike(memberId, addLikeDTO);
         return Response.success("좋아요 추가에 성공하였습니다.");
     }
 
-    @PatchMapping("/delete")
+    @DeleteMapping("/delete")
     public Response<?> deleteLike(@RequestHeader("Authorization") String authorization, @RequestBody AddLikeDTO addLikeDTO) {
         Long memberId = extractMemberIdFromToken(authorization);
         likeService.deleteLike(memberId, addLikeDTO);
