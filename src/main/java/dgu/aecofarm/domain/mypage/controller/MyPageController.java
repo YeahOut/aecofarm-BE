@@ -1,8 +1,7 @@
 package dgu.aecofarm.domain.mypage.controller;
 
 import dgu.aecofarm.domain.mypage.service.MyPageService;
-import dgu.aecofarm.dto.mypage.MyPageResponseDTO;
-import dgu.aecofarm.dto.mypage.UpdateProfileDTO;
+import dgu.aecofarm.dto.mypage.*;
 import dgu.aecofarm.entity.Response;
 import dgu.aecofarm.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +26,13 @@ public class MyPageController {
         Long memberId = extractMemberIdFromToken(authorization);
         myPageService.updateProfile(memberId, updateProfileDTO);
         return Response.success("마이페이지 수정이 완료되었습니다.");
+    }
+
+    @GetMapping("/contract/list")
+    public Response<?> getMyPageContracts(@RequestHeader("Authorization") String authorization) {
+        Long memberId = extractMemberIdFromToken(authorization);
+        MyPageContractListDTO response = myPageService.getMyPageContracts(memberId);
+        return Response.success(response);
     }
 
     private Long extractMemberIdFromToken(String token) {

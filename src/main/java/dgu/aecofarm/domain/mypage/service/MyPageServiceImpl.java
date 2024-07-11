@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -93,5 +94,73 @@ public class MyPageServiceImpl implements MyPageService {
         member.updateProfile(updateProfileDTO.getUserName(), updateProfileDTO.getEmail(), updateProfileDTO.getImage());
 
         memberRepository.save(member);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public MyPageContractListDTO getMyPageContracts(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
+
+        // 빌린 멤버와 빌려준 멤버의 계약 리스트를 가져옴
+        List<Contract> lendContracts = contractRepository.findByLendMember(member);
+        List<Contract> borrowContracts = contractRepository.findByBorrowMember(member);
+
+        // 두 리스트를 합침
+        List<Contract> contracts = new ArrayList<>();
+        contracts.addAll(lendContracts);
+        contracts.addAll(borrowContracts);
+
+        List<MyPageContractListDTO.LendingItem> lendingItems = lendContracts.stream()
+                .sorted(Comparator.comparing(contract -> contract.getItem().getCreatedAt(), Comparator.reverseOrder()))
+                .map(contract -> {
+                    List<String> itemHashList;
+                    try {
+                        itemHashList = objectMapper.readValue(contract.getItem().getItemHash(), List.class);
+                    } catch (IOException e) {
+                        throw new RuntimeException("아이템 해시를 리스트로 변환하는데 실패했습니다.", e);
+                    }
+                    return MyPageContractListDTO.LendingItem.builder()
+                            .contractId(contract.getContractId())
+                            .itemName(contract.getItem().getItemName())
+                            .price(contract.getItem().getPrice())
+                            .itemPlace(contract.getItem().getItemPlace())
+                            .time(contract.getItem().getTime())
+                            .contractTime(contract.getItem().getContractTime())
+                            .itemHash(itemHashList)
+                            .likeStatus(loveRepository.existsByItemAndMember(contract.getItem(), member))
+                            .donateStatus(contract.getItem().getPrice() == 0)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        List<MyPageContractListDTO.BorrowingItem> borrowingItems = borrowContracts.stream()
+                .sorted(Comparator.comparing(contract -> contract.getItem().getCreatedAt(), Comparator.reverseOrder()))
+                .map(contract -> {
+                    List<String> itemHashList;
+                    try {
+                        itemHashList = objectMapper.readValue(contract.getItem().getItemHash(), List.class);
+                    } catch (IOException e) {
+                        throw new RuntimeException("아이템 해시를 리스트로 변환하는데 실패했습니다.", e);
+                    }
+                    return MyPageContractListDTO.BorrowingItem.builder()
+                            .contractId(contract.getContractId())
+                            .itemName(contract.getItem().getItemName())
+                            .itemImage(contract.getItem().getItemImage())
+                            .price(contract.getItem().getPrice())
+                            .itemPlace(contract.getItem().getItemPlace())
+                            .time(contract.getItem().getTime())
+                            .contractTime(contract.getItem().getContractTime())
+                            .itemHash(itemHashList)
+                            .likeStatus(loveRepository.existsByItemAndMember(contract.getItem(), member))
+                            .donateStatus(contract.getItem().getPrice() == 0)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return MyPageContractListDTO.builder()
+                .lendingItems(lendingItems)
+                .borrowingItems(borrowingItems)
+                .build();
     }
 }

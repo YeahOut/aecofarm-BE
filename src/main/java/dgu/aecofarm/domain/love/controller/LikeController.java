@@ -1,6 +1,7 @@
 package dgu.aecofarm.domain.love.controller;
 
-import dgu.aecofarm.dto.like.LikeListDTO;
+
+import dgu.aecofarm.dto.love.LikeListDTO;
 import dgu.aecofarm.entity.Response;
 import dgu.aecofarm.domain.love.service.LikeService;
 import dgu.aecofarm.util.JwtTokenUtil;

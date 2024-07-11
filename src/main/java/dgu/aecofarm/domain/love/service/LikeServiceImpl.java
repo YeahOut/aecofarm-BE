@@ -1,6 +1,6 @@
 package dgu.aecofarm.domain.love.service;
 
-import dgu.aecofarm.dto.like.LikeListDTO;
+import dgu.aecofarm.dto.love.LikeListDTO;
 import dgu.aecofarm.entity.*;
 import dgu.aecofarm.exception.InvalidUserIdException;
 import dgu.aecofarm.repository.ContractRepository;
