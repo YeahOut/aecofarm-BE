@@ -53,6 +53,9 @@ public class Contract {
     @OneToMany(mappedBy = "contract")
     private List<Alarm> alarms;
 
+    @OneToMany(mappedBy = "contract")
+    private List<Love> likes;
+
     // 수정 메서드
     public void updateItem(Item item) {
         this.item = item;

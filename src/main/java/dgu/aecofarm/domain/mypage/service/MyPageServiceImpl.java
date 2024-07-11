@@ -81,6 +81,7 @@ public class MyPageServiceImpl implements MyPageService {
                 .profile(profile)
                 .history(historyList)
                 .build();
+
     }
 
     @Override
