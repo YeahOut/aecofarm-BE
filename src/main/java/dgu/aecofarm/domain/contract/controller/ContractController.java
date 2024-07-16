@@ -24,12 +24,7 @@ public class ContractController {
     public Response<?> createContract(@RequestPart("createContract") CreateContractRequestDTO createContractRequestDTO,
                                       @RequestPart("file") MultipartFile file, Authentication auth) {
         try {
-            String imageUrl;
-            if (file.isEmpty()) {
-                imageUrl = null;
-            } else {
-                imageUrl = memberService.uploadFile(file);
-            }
+            String imageUrl = memberService.uploadFile(file);
             return Response.success(contractService.createContract(imageUrl, createContractRequestDTO, auth.getName()));
         } catch (Exception e) {
             return Response.failure(e);

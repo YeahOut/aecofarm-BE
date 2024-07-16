@@ -73,20 +73,24 @@ public class MemberServiceImpl implements MemberService {
     }
 
     public String uploadFile(MultipartFile file) {
-        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(file.getSize());
-        metadata.setContentType(file.getContentType());  // Content-Type 설정
-        metadata.setContentDisposition("inline");  // Content-Disposition 설정
+        if (file.isEmpty()) {
+            return null;
+        } else {
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(file.getSize());
+            metadata.setContentType(file.getContentType());  // Content-Type 설정
+            metadata.setContentDisposition("inline");  // Content-Disposition 설정
 
-        try {
-            amazonS3.putObject(bucketName, fileName, file.getInputStream(), metadata);
-            amazonS3.setObjectAcl(bucketName, fileName, CannedAccessControlList.PublicRead);  // Set ACL to public-read
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to upload file", e);
+            try {
+                amazonS3.putObject(bucketName, fileName, file.getInputStream(), metadata);
+                amazonS3.setObjectAcl(bucketName, fileName, CannedAccessControlList.PublicRead);  // Set ACL to public-read
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload file", e);
+            }
+
+            return amazonS3.getUrl(bucketName, fileName).toString();
         }
-
-        return amazonS3.getUrl(bucketName, fileName).toString();
     }
 
     public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
