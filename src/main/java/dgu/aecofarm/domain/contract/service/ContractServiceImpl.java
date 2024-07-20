@@ -120,6 +120,13 @@ public class ContractServiceImpl implements ContractService {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
 
+        String nickname;
+        if (contract.getCategory() == Category.BORROW) {
+            nickname = contract.getLendMember().getUserName();
+        } else {
+            nickname = contract.getBorrowMember().getUserName();
+        }
+
         // 수정, 삭제 권한 체크
         boolean hasPermission = false;
         if (contract.getCategory() == Category.BORROW && contract.getLendMember() != null && contract.getLendMember().equals(member)) {
@@ -173,7 +180,7 @@ public class ContractServiceImpl implements ContractService {
 
         return ContractDetailResponseDTO.builder()
                 .owner(hasPermission)
-                .userName(member.getUserName())
+                .userName(nickname)
                 .itemName(item.getItemName())
                 .price(item.getPrice())
                 .itemImage(item.getItemImage())
