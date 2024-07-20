@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dgu.aecofarm.dto.contract.*;
 import dgu.aecofarm.entity.*;
 import dgu.aecofarm.exception.InvalidUserIdException;
-import dgu.aecofarm.repository.AlarmRepository;
-import dgu.aecofarm.repository.ContractRepository;
-import dgu.aecofarm.repository.ItemRepository;
-import dgu.aecofarm.repository.MemberRepository;
+import dgu.aecofarm.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +23,7 @@ public class ContractServiceImpl implements ContractService {
     private final ItemRepository itemRepository;
     private final MemberRepository memberRepository;
     private final AlarmRepository alarmRepository;
+    private final LoveRepository loveRepository;
     private final ObjectMapper objectMapper;
 
     @Transactional
@@ -120,12 +118,16 @@ public class ContractServiceImpl implements ContractService {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
 
+        Item item = contract.getItem();
+
         String nickname;
         if (contract.getCategory() == Category.BORROW) {
             nickname = contract.getLendMember().getUserName();
         } else {
             nickname = contract.getBorrowMember().getUserName();
         }
+
+        boolean likeStatus = loveRepository.existsByItemAndMember(item, member);
 
         // 수정, 삭제 권한 체크
         boolean hasPermission = false;
@@ -134,8 +136,6 @@ public class ContractServiceImpl implements ContractService {
         } else if (contract.getCategory() == Category.LEND && contract.getBorrowMember() != null && contract.getBorrowMember().equals(member)) {
             hasPermission = true;
         }
-
-        Item item = contract.getItem();
 
         List<String> itemHashList;
         try {
@@ -188,6 +188,7 @@ public class ContractServiceImpl implements ContractService {
                 .itemPlace(item.getItemPlace())
                 .itemHash(itemHashList)
                 .time(item.getTime())
+                .likeStatus(likeStatus)
                 .contractTime(item.getContractTime())
                 .kakao(item.getKakao())
                 .createdAt(item.getCreatedAt())

@@ -21,6 +21,7 @@ public class ContractDetailResponseDTO {
     private List<String> itemHash;
     private Integer time;
     private Integer contractTime;
+    private Boolean likeStatus;
     private String kakao;
     private LocalDateTime createdAt;
 }
