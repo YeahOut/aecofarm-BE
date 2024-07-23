@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dgu.aecofarm.dto.mypage.*;
 import dgu.aecofarm.entity.*;
 import dgu.aecofarm.exception.InvalidUserIdException;
+import dgu.aecofarm.repository.AlarmRepository;
 import dgu.aecofarm.repository.ContractRepository;
 import dgu.aecofarm.repository.LoveRepository;
 import dgu.aecofarm.repository.MemberRepository;
@@ -31,6 +32,7 @@ public class MyPageServiceImpl implements MyPageService {
     private final MemberRepository memberRepository;
     private final ContractRepository contractRepository;
     private final LoveRepository loveRepository;
+    private final AlarmRepository alarmRepository;
     private final ObjectMapper objectMapper;
 
     private final AmazonS3 amazonS3;
@@ -191,6 +193,70 @@ public class MyPageServiceImpl implements MyPageService {
                             .itemHash(itemHashList)
                             .likeStatus(loveRepository.existsByItemAndMember(contract.getItem(), member))
                             .donateStatus(contract.getItem().getPrice() == 0)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return MyPageContractListDTO.builder()
+                .lendingItems(lendingItems)
+                .borrowingItems(borrowingItems)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public MyPageContractListDTO getCompleteContracts(Long memberId) {
+        Member member = memberRepository.findById(Long.valueOf(memberId))
+                .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
+
+        List<Alarm> completedAlarms = alarmRepository.findByLendMemberOrBorrowMember(member, member).stream()
+                .filter(alarm -> alarm.getAlarmStatus() == AlarmStatus.COMPLETE)
+                .collect(Collectors.toList());
+
+        List<MyPageContractListDTO.LendingItem> lendingItems = completedAlarms.stream()
+                .filter(alarm -> alarm.getContract().getCategory() == Category.LEND)
+                .sorted(Comparator.comparing(alarm -> alarm.getContract().getItem().getCreatedAt(), Comparator.reverseOrder()))
+                .map(alarm -> {
+                    List<String> itemHashList;
+                    try {
+                        itemHashList = objectMapper.readValue(alarm.getContract().getItem().getItemHash(), List.class);
+                    } catch (IOException e) {
+                        throw new RuntimeException("아이템 해시를 리스트로 변환하는데 실패했습니다.", e);
+                    }
+                    return MyPageContractListDTO.LendingItem.builder()
+                            .contractId(alarm.getContract().getContractId())
+                            .itemName(alarm.getContract().getItem().getItemName())
+                            .price(alarm.getContract().getItem().getPrice())
+                            .itemPlace(alarm.getContract().getItem().getItemPlace())
+                            .time(alarm.getContract().getItem().getTime())
+                            .contractTime(alarm.getContract().getItem().getContractTime())
+                            .itemHash(itemHashList)
+                            .likeStatus(loveRepository.existsByItemAndMember(alarm.getContract().getItem(), member))
+                            .donateStatus(alarm.getContract().getItem().getPrice() == 0)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        List<MyPageContractListDTO.BorrowingItem> borrowingItems = completedAlarms.stream()
+                .filter(alarm -> alarm.getContract().getCategory() == Category.BORROW)
+                .sorted(Comparator.comparing(alarm -> alarm.getContract().getItem().getCreatedAt(), Comparator.reverseOrder()))
+                .map(alarm -> {
+                    List<String> itemHashList;
+                    try {
+                        itemHashList = objectMapper.readValue(alarm.getContract().getItem().getItemHash(), List.class);
+                    } catch (IOException e) {
+                        throw new RuntimeException("아이템 해시를 리스트로 변환하는데 실패했습니다.", e);
+                    }
+                    return MyPageContractListDTO.BorrowingItem.builder()
+                            .contractId(alarm.getContract().getContractId())
+                            .itemName(alarm.getContract().getItem().getItemName())
+                            .itemImage(alarm.getContract().getItem().getItemImage())
+                            .price(alarm.getContract().getItem().getPrice())
+                            .itemPlace(alarm.getContract().getItem().getItemPlace())
+                            .time(alarm.getContract().getItem().getTime())
+                            .contractTime(alarm.getContract().getItem().getContractTime())
+                            .itemHash(itemHashList)
+                            .likeStatus(loveRepository.existsByItemAndMember(alarm.getContract().getItem(), member))
+                            .donateStatus(alarm.getContract().getItem().getPrice() == 0)
                             .build();
                 })
                 .collect(Collectors.toList());

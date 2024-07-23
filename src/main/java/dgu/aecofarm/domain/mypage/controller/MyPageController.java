@@ -5,6 +5,7 @@ import dgu.aecofarm.dto.mypage.*;
 import dgu.aecofarm.entity.Response;
 import dgu.aecofarm.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,6 +37,11 @@ public class MyPageController {
         Long memberId = extractMemberIdFromToken(authorization);
         MyPageContractListDTO response = myPageService.getMyPageContracts(memberId);
         return Response.success(response);
+    }
+
+    @GetMapping("/contract/complete/list")
+    public Response<?> getCompleteContracts(Authentication auth) {
+        return Response.success(myPageService.getCompleteContracts(Long.valueOf(auth.getName())));
     }
 
     private Long extractMemberIdFromToken(String token) {

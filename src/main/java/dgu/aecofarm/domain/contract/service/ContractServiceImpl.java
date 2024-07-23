@@ -266,6 +266,7 @@ public class ContractServiceImpl implements ContractService {
 
         // contract 상태 업데이트 및 alarm 상태 업데이트
         contract.updateStatus(Status.COMPLETED);
+        contract.updateSuccessTime(LocalDateTime.now());
         contractRepository.save(contract);
 
         Alarm alarm = alarmRepository.findByContract(contract)
