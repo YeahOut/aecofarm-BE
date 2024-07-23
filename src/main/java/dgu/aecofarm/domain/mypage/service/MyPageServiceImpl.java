@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MyPageServiceImpl implements MyPageService {
 
     private final MemberRepository memberRepository;
@@ -37,8 +38,6 @@ public class MyPageServiceImpl implements MyPageService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
-    @Override
-    @Transactional
     public MyPageResponseDTO getMyPage(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
@@ -96,8 +95,6 @@ public class MyPageServiceImpl implements MyPageService {
 
     }
 
-    @Override
-    @Transactional
     public void updateProfile(Long memberId, UpdateProfileDTO updateProfileDTO, MultipartFile file) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
@@ -138,7 +135,6 @@ public class MyPageServiceImpl implements MyPageService {
         amazonS3.deleteObject(bucketName, fileName);
     }
 
-    @Override
     @Transactional(readOnly = true)
     public MyPageContractListDTO getMyPageContracts(Long memberId) {
         Member member = memberRepository.findById(memberId)

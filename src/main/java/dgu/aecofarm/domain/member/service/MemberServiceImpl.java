@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
@@ -147,7 +148,6 @@ public class MemberServiceImpl implements MemberService {
 
     }
 
-    @Override
     public String signout(String memberId) {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new IllegalArgumentException("유효한 사용자 ID가 아닙니다."));
@@ -221,7 +221,6 @@ public class MemberServiceImpl implements MemberService {
                 .build();
     }
 
-    @Transactional
     public SearchResponseDTO searchItems(SearchRequestDTO searchRequestDTO, String memberId) {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));

@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class LendServiceImpl implements LendService {
 
     private final ContractRepository contractRepository;
@@ -30,7 +31,6 @@ public class LendServiceImpl implements LendService {
     private final LoveRepository loveRepository;
     private final ObjectMapper objectMapper;
 
-    @Transactional
     public String requestLend(Long contractId, String memberId) {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new IllegalArgumentException("유효한 계약 ID가 아닙니다."));
@@ -60,7 +60,6 @@ public class LendServiceImpl implements LendService {
         return "빌려주기 요청에 성공하였습니다.";
     }
 
-    @Transactional
     public List<LendListResponseDTO> getLendList(String memberId, SortType sortType) {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));

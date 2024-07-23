@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class LikeServiceImpl implements LikeService {
 
     private final MemberRepository memberRepository;
@@ -25,8 +26,6 @@ public class LikeServiceImpl implements LikeService {
     private final LoveRepository loveRepository;
     private final ContractRepository contractRepository;
 
-    @Override
-    @Transactional
     public void addLike(Long memberId, Long contractId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
@@ -52,8 +51,6 @@ public class LikeServiceImpl implements LikeService {
         }
     }
 
-    @Override
-    @Transactional
     public void deleteLike(Long memberId, Long contractId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));

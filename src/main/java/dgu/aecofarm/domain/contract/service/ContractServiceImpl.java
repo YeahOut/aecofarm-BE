@@ -17,6 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ContractServiceImpl implements ContractService {
 
     private final ContractRepository contractRepository;
@@ -26,7 +27,6 @@ public class ContractServiceImpl implements ContractService {
     private final LoveRepository loveRepository;
     private final ObjectMapper objectMapper;
 
-    @Transactional
     public String createContract(String imageUrl, CreateContractRequestDTO createContractRequestDTO, String memberId) {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
@@ -67,7 +67,6 @@ public class ContractServiceImpl implements ContractService {
         return "게시글 등록에 성공하였습니다.";
     }
 
-    @Transactional
     public String updateContract(String imageUrl, Long contractId, CreateContractRequestDTO createContractRequestDTO, String memberId) {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new IllegalArgumentException("유효한 계약 ID가 아닙니다."));
@@ -98,7 +97,6 @@ public class ContractServiceImpl implements ContractService {
         return "게시글 수정에 성공하였습니다.";
     }
 
-    @Transactional
     public String deleteContract(Long contractId, String memberId) {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new IllegalArgumentException("유효한 계약 ID가 아닙니다."));
@@ -110,7 +108,6 @@ public class ContractServiceImpl implements ContractService {
         return "게시글 삭제에 성공하였습니다.";
     }
 
-    @Transactional
     public ContractDetailResponseDTO getContractDetail(Long contractId, String memberId) {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 게시글 입니다."));
@@ -195,7 +192,6 @@ public class ContractServiceImpl implements ContractService {
                 .build();
     }
 
-    @Transactional
     public GetPayResponseDTO getPayDetails(Long contractId, String memberId) {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
@@ -235,7 +231,6 @@ public class ContractServiceImpl implements ContractService {
                 .build();
     }
 
-    @Transactional
     public String payForContract(PayRequestDTO payRequestDTO, String memberId) {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
@@ -285,7 +280,6 @@ public class ContractServiceImpl implements ContractService {
         return "결제가 완료되었습니다.";
     }
 
-    @Transactional
     public GetReserveResponseDTO getReserveDetails(Long contractId) {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new IllegalArgumentException("유효한 계약 ID가 아닙니다."));
