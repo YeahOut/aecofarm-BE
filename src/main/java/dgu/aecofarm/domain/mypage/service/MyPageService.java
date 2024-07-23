@@ -7,4 +7,6 @@ public interface MyPageService {
     MyPageResponseDTO getMyPage(Long memberId);
     void updateProfile(Long memberId, UpdateProfileDTO updateProfileDTO, MultipartFile file);
     MyPageContractListDTO getMyPageContracts(Long memberId);
+    MyPageContractListDTO getCompleteContracts(Long memberId);
+
 }
