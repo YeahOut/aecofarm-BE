@@ -14,10 +14,9 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000", "https://aecofarm-fe-6pnz.vercel.app")
+                        .allowedOrigins("*")
                         .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE")
-                        .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .allowedHeaders("*");
             }
         };
     }
