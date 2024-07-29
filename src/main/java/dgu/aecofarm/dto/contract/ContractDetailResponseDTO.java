@@ -14,6 +14,7 @@ public class ContractDetailResponseDTO {
     private Boolean owner;
     private String userName;
     private String itemName;
+    private String userImage;
     private Integer price;
     private String itemImage;
     private String itemContents;
