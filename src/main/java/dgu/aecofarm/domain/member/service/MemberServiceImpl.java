@@ -152,6 +152,9 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new IllegalArgumentException("유효한 사용자 ID가 아닙니다."));
 
+        List<Love> loves = loveRepository.findByMember(member);
+        loveRepository.deleteAll(loves);
+
         memberRepository.delete(member);
 
         return "회원 탈퇴에 성공하였습니다.";

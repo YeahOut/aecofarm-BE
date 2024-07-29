@@ -16,4 +16,5 @@ public interface LoveRepository extends JpaRepository<Love, Long> {
     List<Love> findByItem(Item item);
 
     List<Love> findByMember(Member member);
+
 }
