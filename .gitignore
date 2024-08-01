@@ -1,6 +1,5 @@
 .DS_Store
 application.properties
-application.yml
 data.sql
 
 HELP.md

@@ -74,7 +74,9 @@ public class MyPageServiceImpl implements MyPageService {
         List<Contract> recentContracts = new ArrayList<>();
         for (int i = recentContractIds.size() - 1; i >= 0; i--) {
             Long contractId = recentContractIds.get(i);
-            contractRepository.findById(contractId).ifPresent(recentContracts::add);
+            contractRepository.findById(contractId)
+                    .filter(contract -> contract.getStatus() == Status.NONE)
+                    .ifPresent(recentContracts::add);
         }
 
         List<HistoryDTO> historyList = recentContracts.stream().map(contract -> {
@@ -94,7 +96,6 @@ public class MyPageServiceImpl implements MyPageService {
                 .profile(profile)
                 .history(historyList)
                 .build();
-
     }
 
     public void updateProfile(Long memberId, UpdateProfileDTO updateProfileDTO, MultipartFile file) {

@@ -152,6 +152,9 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new IllegalArgumentException("유효한 사용자 ID가 아닙니다."));
 
+        List<Love> loves = loveRepository.findByMember(member);
+        loveRepository.deleteAll(loves);
+
         memberRepository.delete(member);
 
         return "회원 탈퇴에 성공하였습니다.";
@@ -199,6 +202,7 @@ public class MemberServiceImpl implements MemberService {
 
             recommendedKeywords = recentContractIds.stream()
                     .map(contractId -> contractRepository.findById(contractId)
+                            .filter(contract -> contract.getStatus() == Status.NONE)
                             .map(Contract::getItem)
                             .map(Item::getItemName)
                             .orElse(null))
@@ -208,9 +212,10 @@ public class MemberServiceImpl implements MemberService {
             throw new RuntimeException("최근 본 물품을 리스트로 변환하는데 실패했습니다.", e);
         }
 
-
-
         List<String> hotSearchRankings = itemRepository.findAllByOrderByClickDesc().stream()
+                .filter(item -> contractRepository.findByItem(item)
+                        .stream()
+                        .anyMatch(contract -> contract.getStatus() == Status.NONE))
                 .map(Item::getItemName)
                 .limit(8) // HOT 순위는 최대 8개까지 가져옴
                 .collect(Collectors.toList());

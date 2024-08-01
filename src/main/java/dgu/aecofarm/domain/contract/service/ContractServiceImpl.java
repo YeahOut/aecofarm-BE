@@ -118,10 +118,13 @@ public class ContractServiceImpl implements ContractService {
         Item item = contract.getItem();
 
         String nickname;
+        String userImage;
         if (contract.getCategory() == Category.BORROW) {
             nickname = contract.getLendMember().getUserName();
+            userImage = contract.getLendMember().getImage();
         } else {
             nickname = contract.getBorrowMember().getUserName();
+            userImage = contract.getBorrowMember().getImage();
         }
 
         boolean likeStatus = loveRepository.existsByItemAndMember(item, member);
@@ -178,6 +181,7 @@ public class ContractServiceImpl implements ContractService {
         return ContractDetailResponseDTO.builder()
                 .owner(hasPermission)
                 .userName(nickname)
+                .userImage(userImage)
                 .itemName(item.getItemName())
                 .price(item.getPrice())
                 .itemImage(item.getItemImage())
