@@ -48,7 +48,7 @@ public class MemberServiceImpl implements MemberService {
     private String bucketName;
 
     @Override
-    public String initiateSignup(SignupRequestDTO signupRequestDTO, String imageUrl) {
+    public SignupResponseDTO initiateSignup(SignupRequestDTO signupRequestDTO, String imageUrl) {
         Optional<Member> checkDuplicate = memberRepository.findMemberByEmail(signupRequestDTO.getEmail());
         if (checkDuplicate.isPresent()) {
             throw new IllegalArgumentException("중복된 이메일입니다.");
@@ -57,7 +57,10 @@ public class MemberServiceImpl implements MemberService {
         String authCode = generateAuthCode();
         emailService.sendAuthCode(signupRequestDTO.getEmail(), authCode);
 
-        return authCode;
+        return SignupResponseDTO.builder()
+                .signupRequestDTO(signupRequestDTO)
+                .expectedCode(authCode)
+                .build();
     }
 
     @Override
