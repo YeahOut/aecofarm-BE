@@ -29,11 +29,9 @@ public class MemberController {
                               @RequestPart("file") MultipartFile file) {
         try {
             String imageUrl = memberService.uploadFile(file);
-            String emailCode = memberService.initiateSignup(signupRequestDTO, imageUrl);
-            EmailResponseDto emailResponseDto = new EmailResponseDto();
-            emailResponseDto.setCode(emailCode);
-
-            return Response.success(emailResponseDto);
+            SignupResponseDTO signupResponseDTO = memberService.initiateSignup(signupRequestDTO, imageUrl);
+            signupResponseDTO.getSignupRequestDTO().setImageUrl(imageUrl);
+            return Response.success(signupResponseDTO);
         } catch (Exception e) {
             return Response.failure(e);
         }
