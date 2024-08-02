@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dgu.aecofarm.domain.email.service.EmailService;
 import dgu.aecofarm.dto.member.*;
 import dgu.aecofarm.entity.*;
 import dgu.aecofarm.exception.InvalidUserIdException;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
+    private final EmailService emailService;
     private final ItemRepository itemRepository;
     private final ObjectMapper objectMapper;
     private final ContractRepository contractRepository;
@@ -45,24 +47,34 @@ public class MemberServiceImpl implements MemberService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
-    public String signup(SignupRequestDTO signupRequestDTO, String imageUrl) {
-        String email = signupRequestDTO.getEmail();
-        String userName = signupRequestDTO.getUserName();
-        String password = toSHA256(signupRequestDTO.getPassword());
-        String phone = signupRequestDTO.getPhone();
-        int schoolNum = signupRequestDTO.getSchoolNum();
-
-        Member checkDuplicate = memberRepository.findMemberByEmail(email);
-        if (checkDuplicate != null) {
+    @Override
+    public SignupResponseDTO initiateSignup(SignupRequestDTO signupRequestDTO, String imageUrl) {
+        Optional<Member> checkDuplicate = memberRepository.findMemberByEmail(signupRequestDTO.getEmail());
+        if (checkDuplicate.isPresent()) {
             throw new IllegalArgumentException("중복된 이메일입니다.");
         }
 
+        String authCode = generateAuthCode();
+        emailService.sendAuthCode(signupRequestDTO.getEmail(), authCode);
+
+        return SignupResponseDTO.builder()
+                .signupRequestDTO(signupRequestDTO)
+                .expectedCode(authCode)
+                .build();
+    }
+
+    @Override
+    public String completeSignup(SignupRequestDTO signupRequestDTO, String authCode, String expectedCode, String imageUrl) {
+        if (!authCode.equals(expectedCode)) {
+            throw new IllegalArgumentException("인증 코드가 일치하지 않습니다.");
+        }
+
         Member member = Member.builder()
-                .email(email)
-                .userName(userName)
-                .password(password)
-                .phone(phone)
-                .schoolNum(schoolNum)
+                .email(signupRequestDTO.getEmail())
+                .userName(signupRequestDTO.getUserName())
+                .password(toSHA256(signupRequestDTO.getPassword()))
+                .phone(signupRequestDTO.getPhone())
+                .schoolNum(signupRequestDTO.getSchoolNum())
                 .image(imageUrl)
                 .point(3000)
                 .build();
@@ -73,6 +85,7 @@ public class MemberServiceImpl implements MemberService {
         return "회원가입 성공";
     }
 
+    @Override
     public String uploadFile(MultipartFile file) {
         if (file.isEmpty()) {
             return null;
@@ -94,12 +107,14 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    @Override
     public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
-        Member member = memberRepository.findMemberByEmail(loginRequestDTO.getEmail());
-        if (member == null) {
+        Optional<Member> optionalMember = memberRepository.findMemberByEmail(loginRequestDTO.getEmail());
+        if (!optionalMember.isPresent()) {
             throw new IllegalArgumentException("유효한 이메일이 아닙니다.");
         }
 
+        Member member = optionalMember.get();
         String encode_password = toSHA256(loginRequestDTO.getPassword());
 
         if (encode_password.equals(member.getPassword())) {
@@ -111,13 +126,13 @@ public class MemberServiceImpl implements MemberService {
         }
         throw new IllegalArgumentException("비밀번호가 틀립니다.");
     }
-
     // Jwt Token에서 추출한 loginId로 Member 찾아오기
+    @Override
     public Optional<Member> getLoginUserInfoByMemberId(String memberId) {
         return memberRepository.findByMemberId(Long.valueOf(memberId));
     }
-
     // 로그인한 Member 조회
+    @Override
     public Optional<JwtInfoResponseDTO> getLoginUserInfoByUserid(String memberId) {
         return memberRepository.findByMemberId(Long.valueOf(memberId)).map(member ->
                 JwtInfoResponseDTO.builder()
@@ -126,28 +141,27 @@ public class MemberServiceImpl implements MemberService {
                         .build());
     }
 
+    @Override
     public String findPassword(FindPasswordRequestDTO findPasswordDTO) {
-        // memberId로 회원 정보 조회
-        Member member = memberRepository.findMemberByEmail(findPasswordDTO.getEmail());
-
-        if (member == null) {
+        Optional<Member> optionalMember = memberRepository.findMemberByEmail(findPasswordDTO.getEmail());
+        if (!optionalMember.isPresent()) {
             throw new IllegalArgumentException("유효한 이메일이 아닙니다.");
-        }
+        }// 사용자 이름과 학번이 일치하는지 확인
+        Member member = optionalMember.get();
 
         // 사용자 이름과 학번이 일치하는지 확인
         if (!member.getUserName().equals(findPasswordDTO.getUserName()) || member.getSchoolNum() != findPasswordDTO.getSchoolNum()) {
             throw new IllegalArgumentException("사용자 정보가 일치하지 않습니다.");
         }
-
         // 비밀번호 재설정
         String newPassword = toSHA256(findPasswordDTO.getPassword());
         member.updatePassword(newPassword);
         memberRepository.save(member);
 
         return "비밀번호 재설정에 성공하였습니다.";
-
     }
 
+    @Override
     public String signout(String memberId) {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new IllegalArgumentException("유효한 사용자 ID가 아닙니다."));
@@ -160,24 +174,7 @@ public class MemberServiceImpl implements MemberService {
         return "회원 탈퇴에 성공하였습니다.";
     }
 
-    private String toSHA256(String base) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(base.getBytes("UTF-8"));
-            StringBuilder hexString = new StringBuilder();
-
-            for (int i = 0; i < hash.length; i++) {
-                String hex = Integer.toHexString(0xff & hash[i]);
-                if(hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-
-            return hexString.toString();
-        } catch(NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
+    @Override
     public RecommendResponseDTO getRecommand(String memberId) {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
@@ -226,6 +223,7 @@ public class MemberServiceImpl implements MemberService {
                 .build();
     }
 
+    @Override
     public SearchResponseDTO searchItems(SearchRequestDTO searchRequestDTO, String memberId) {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));
@@ -289,5 +287,27 @@ public class MemberServiceImpl implements MemberService {
                 .lendItems(lendItems)
                 .borrowItems(borrowItems)
                 .build();
+    }
+
+    private String generateAuthCode() {
+        return UUID.randomUUID().toString().replaceAll("-", "").substring(0, 8);
+    }
+
+    private String toSHA256(String base) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(base.getBytes("UTF-8"));
+            StringBuilder hexString = new StringBuilder();
+
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
