@@ -7,7 +7,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Optional;
 
 public interface MemberService {
-    String signup(SignupRequestDTO registerRequestDTO, String imageUrl);
+    String initiateSignup(SignupRequestDTO signupRequestDTO, String imageUrl);
+
+    String completeSignup(SignupRequestDTO signupRequestDTO, String authCode, String expectedCode, String imageUrl);
 
     String uploadFile(MultipartFile file);
 
