@@ -51,4 +51,9 @@ public class MyPageController {
         String memberId = JwtTokenUtil.getLoginId(jwtToken);
         return Long.valueOf(memberId); // 추출한 memberId를 Long 타입으로 변환
     }
+
+    @GetMapping("/hi")
+    private String test() {
+        return "success!";
+    }
 }
