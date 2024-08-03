@@ -45,6 +45,8 @@ jobs:
             exit 1
           fi
           cp Procfile deploy/Procfile
+          echo -e '#!/bin/bash\njava -jar /var/app/current/application.jar' > deploy/appstart
+          chmod +x deploy/appstart
           cp -r .ebextensions-dev deploy/.ebextensions
           cp -r .platform deploy/.platform
           cd deploy && zip -r deploy.zip .
