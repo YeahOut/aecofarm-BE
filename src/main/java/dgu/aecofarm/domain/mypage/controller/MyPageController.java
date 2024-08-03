@@ -52,7 +52,7 @@ public class MyPageController {
         return Long.valueOf(memberId); // 추출한 memberId를 Long 타입으로 변환
     }
 
-    @GetMapping("/hi")
+    @GetMapping("/hello")
     private String test() {
         return "success!";
     }
