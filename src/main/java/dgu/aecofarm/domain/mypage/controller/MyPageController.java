@@ -54,6 +54,6 @@ public class MyPageController {
 
     @GetMapping("/hello")
     private String test() {
-        return "success!";
+        return "성공입니다!!!!!!!";
     }
 }
