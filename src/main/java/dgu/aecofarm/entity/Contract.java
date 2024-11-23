@@ -50,10 +50,10 @@ public class Contract {
     // 대여 요청 시간
     private LocalDateTime askTime;
 
-    @OneToMany(mappedBy = "contract")
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
     private List<Alarm> alarms;
 
-    @OneToMany(mappedBy = "contract")
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
     private List<Love> likes;
 
     // 수정 메서드

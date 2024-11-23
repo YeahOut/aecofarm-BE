@@ -14,7 +14,7 @@ public class LendController {
 
     private final LendService lendService;
 
-    @PatchMapping("/reqeust/{contractId}")
+    @PatchMapping("/request/{contractId}")
     public Response<?> requestLend(@PathVariable("contractId") Long contractId, Authentication auth) {
         try {
             return Response.success(lendService.requestLend(contractId, auth.getName()));

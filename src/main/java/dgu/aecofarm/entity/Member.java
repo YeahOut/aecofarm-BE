@@ -57,16 +57,16 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<Love> likes;
 
-    @OneToMany(mappedBy = "lendMember")
+    @OneToMany(mappedBy = "lendMember", cascade = CascadeType.REMOVE)
     private List<Contract> lendContracts;
 
-    @OneToMany(mappedBy = "borrowMember")
+    @OneToMany(mappedBy = "borrowMember", cascade = CascadeType.REMOVE)
     private List<Contract> borrowContracts;
 
-    @OneToMany(mappedBy = "lendMember")
+    @OneToMany(mappedBy = "lendMember", cascade = CascadeType.REMOVE)
     private List<Alarm> lendAlarms;
 
-    @OneToMany(mappedBy = "borrowMember")
+    @OneToMany(mappedBy = "borrowMember", cascade = CascadeType.REMOVE)
     private List<Alarm> borrowAlarms;
 
     // 비밀번호 변경

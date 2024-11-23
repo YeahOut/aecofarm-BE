@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AlarmServiceImpl implements AlarmService {
 
     private final AlarmRepository alarmRepository;
     private final MemberRepository memberRepository;
 
-    @Transactional
     public AlarmResponseDTO getAlarmStatus(String memberId) {
         Member member = memberRepository.findById(Long.valueOf(memberId))
                 .orElseThrow(() -> new InvalidUserIdException("유효한 사용자 ID가 아닙니다."));

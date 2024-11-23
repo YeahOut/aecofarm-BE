@@ -16,7 +16,7 @@ public class BorrowController {
 
     private final BorrowService borrowService;
 
-    @PatchMapping("/reqeust/{contractId}")
+    @PatchMapping("/request/{contractId}")
     public Response<?> requestBorrow(@PathVariable("contractId") Long contractId, Authentication auth) {
         try {
             return Response.success(borrowService.requestBorrow(contractId, auth.getName()));

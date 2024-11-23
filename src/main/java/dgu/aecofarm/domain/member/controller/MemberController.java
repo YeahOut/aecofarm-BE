@@ -2,6 +2,7 @@ package dgu.aecofarm.domain.member.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dgu.aecofarm.domain.member.service.MemberService;
+import dgu.aecofarm.dto.email.EmailResponseDto;
 import dgu.aecofarm.dto.member.*;
 import dgu.aecofarm.entity.Member;
 import dgu.aecofarm.entity.Response;
@@ -10,6 +11,7 @@ import dgu.aecofarm.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,14 +25,28 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/signup")
-    public Response<?> signup(@RequestBody SignupRequestDTO signupRequestDTO) {
+    public Response<?> signup(@RequestPart("signupData") SignupRequestDTO signupRequestDTO,
+                              @RequestPart("file") MultipartFile file) {
         try {
-            return Response.success(memberService.signup(signupRequestDTO));
+            String imageUrl = memberService.uploadFile(file);
+            SignupResponseDTO signupResponseDTO = memberService.initiateSignup(signupRequestDTO, imageUrl);
+            signupResponseDTO.getSignupRequestDTO().setImageUrl(imageUrl);
+            return Response.success(signupResponseDTO);
         } catch (Exception e) {
             return Response.failure(e);
         }
     }
-
+    @PostMapping("/signup/complete")
+    public Response<?> completeSignup(@RequestBody SignupCompleteDTO signupCompleteDTO) {
+        try {
+            return Response.success(memberService.completeSignup(signupCompleteDTO.getSignupRequestDTO(),
+                    signupCompleteDTO.getAuthCode(),
+                    signupCompleteDTO.getExpectedCode(),
+                    signupCompleteDTO.getSignupRequestDTO().getImageUrl()));
+        } catch (Exception e) {
+            return Response.failure(e);
+        }
+    }
     @PostMapping("/login")
     public Response<?> login(@RequestBody LoginRequestDTO loginRequestDTO) {
         try {
